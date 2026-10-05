@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1118">
+<title>台股爆發雷達 321</title>
+<style>
+:root{--bg:#081019;--card:#101a24;--line:#263544;--text:#f2f6fa;--muted:#91a0ad;--green:#28d17c;--red:#ff6474;--yellow:#ffd166;--blue:#4da3ff}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#071019,#0b121a);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif}
+.wrap{max-width:1100px;margin:auto;padding:18px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0 22px}
+h1{font-size:25px;margin:0}.sub{color:var(--muted);font-size:13px;margin-top:5px}
+.badge{border:1px solid #2d4354;border-radius:999px;padding:8px 12px;color:#b9c8d5;font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.card{background:rgba(16,26,36,.92);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.15)}
+.kpi{font-size:25px;font-weight:800;margin-top:8px}.muted{color:var(--muted)}.green{color:var(--green)}.red{color:var(--red)}.yellow{color:var(--yellow)}
+section{margin-top:16px}.section-title{font-size:18px;font-weight:800;margin-bottom:10px}
+.filters{display:flex;gap:8px;overflow:auto;padding-bottom:3px}.filters button,.action{white-space:nowrap;background:#162432;color:#dce7ef;border:1px solid #304454;border-radius:10px;padding:10px 13px}
+.filters button.active{background:#1d704b;border-color:#32c97d}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:13px 8px;border-bottom:1px solid #22313e;text-align:left}th{color:#8fa0ae;font-weight:600}tr:last-child td{border-bottom:0}
+.score{font-weight:900}.tag{display:inline-block;border-radius:7px;padding:4px 7px;font-size:11px;margin-right:4px;background:#203242}.tag.hot{background:#5c2c34;color:#ffb1b9}.tag.ok{background:#173f31;color:#7ef0ae}
+.two{display:grid;grid-template-columns:1.35fr .65fr;gap:12px}.list{display:grid;gap:8px}.row{display:flex;justify-content:space-between;gap:10px;padding:11px;border:1px solid #243543;border-radius:10px;background:#0d1720}
+small{color:var(--muted)}footer{text-align:center;color:#667582;font-size:12px;padding:30px 0}
+@media(max-width:720px){.wrap{padding:12px}.grid{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}table{min-width:720px}.table-scroll{overflow:auto}.kpi{font-size:21px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div><h1>🚀 台股爆發雷達 321</h1><div class="sub">前一天潛力股｜突破確認｜三大法人｜主力｜風險管理</div></div>
+  <div class="badge">正式版 v1.0</div>
+</header>
+
+<div class="grid">
+  <div class="card"><div class="muted">今日雷達候選</div><div class="kpi">28 檔</div><small>自動篩選</small></div>
+  <div class="card"><div class="muted">爆發分數 ≥ 80</div><div class="kpi green">7 檔</div><small>高潛力</small></div>
+  <div class="card"><div class="muted">突破確認</div><div class="kpi yellow">5 檔</div><small>待量價確認</small></div>
+  <div class="card"><div class="muted">高風險</div><div class="kpi red">3 檔</div><small>避免追價</small></div>
+</div>
+
+<section class="card">
+<div class="section-title">🔎 每日篩選</div>
+<div class="filters">
+<button class="active" onclick="filterRows('all',this)">全部</button>
+<button onclick="filterRows('hot',this)">爆發潛力</button>
+<button onclick="filterRows('break',this)">突破</button>
+<button onclick="filterRows('risk',this)">風險</button>
+</div>
+</section>
+
+<section class="card">
+<div class="section-title">🔥 前一天潛力股</div>
+<div class="table-scroll">
+<table id="stockTable">
+<thead><tr><th>股票</th><th>爆發分數</th><th>訊號</th><th>技術面</th><th>法人</th><th>主力</th><th>風險</th><th>策略</th></tr></thead>
+<tbody>
+<tr data-type="hot"><td><b>2330 台積電</b></td><td class="score green">94</td><td><span class="tag ok">強勢</span></td><td>MA多頭 / RSI 68</td><td class="green">+12,480張</td><td class="green">偏多</td><td>低</td><td>回測買入</td></tr>
+<tr data-type="break"><td><b>2454 聯發科</b></td><td class="score green">88</td><td><span class="tag ok">突破</span></td><td>突破箱頂 / MACD+</td><td class="green">+6,210張</td><td class="green">偏多</td><td>中</td><td>突破確認</td></tr>
+<tr data-type="hot"><td><b>2382 廣達</b></td><td class="score green">86</td><td><span class="tag ok">量增</span></td><td>量價齊揚 / RSI 64</td><td class="green">+4,830張</td><td class="green">偏多</td><td>中</td><td>分批布局</td></tr>
+<tr data-type="risk"><td><b>3231 緯創</b></td><td class="score yellow">72</td><td><span class="tag hot">假突破</span></td><td>乖離偏大</td><td class="red">-3,120張</td><td class="red">偏空</td><td class="red">高</td><td>觀望</td></tr>
+</tbody>
+</table>
+</div>
+<small>※ 上述數字為介面示範資料；正式版需串接即時/收盤資料來源後才會自動更新。</small>
+</section>
+
+<div class="two">
+<section class="card">
+<div class="section-title">🎯 策略區</div>
+<div class="list">
+<div class="row"><span>買入區</span><b class="green">突破回測 / 量縮止穩</b></div>
+<div class="row"><span>停損</span><b class="red">跌破關鍵支撐</b></div>
+<div class="row"><span>第一目標</span><b>前高壓力</b></div>
+<div class="row"><span>第二目標</span><b>量測漲幅 / 趨勢延伸</b></div>
+</div>
+</section>
+<section class="card">
+<div class="section-title">🏦 法人 & 主力</div>
+<div class="list">
+<div class="row"><span>外資</span><b class="green">偏多</b></div>
+<div class="row"><span>投信</span><b class="green">偏多</b></div>
+<div class="row"><span>自營商</span><b>中性</b></div>
+<div class="row"><span>主力</span><b class="green">集中</b></div>
+</div>
+</section>
+</div>
+
+<section class="card">
+<div class="section-title">📌 未來外掛系統</div>
+<div class="filters">
+<button>📊 K線</button><button>📈 RSI / MACD</button><button>🏦 三大法人</button><button>👑 主力</button><button>🔔 突破提醒</button><button>🤖 自動掃描</button>
+</div>
+</section>
+<footer>321 Taiwan Stock Radar · 僅供研究與資訊整理，不構成投資建議</footer>
+</div>
+<script>
+function filterRows(type,btn){
+ document.querySelectorAll('.filters button').forEach(b=>{if(b.parentElement===btn.parentElement)b.classList.remove('active')});
+ btn.classList.add('active');
+ document.querySelectorAll('#stockTable tbody tr').forEach(r=>r.style.display=(type==='all'||r.dataset.type===type)?'':'none');
+}
+</script>
+</body>
+</html>
