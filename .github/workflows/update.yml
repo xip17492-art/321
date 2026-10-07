@@ -3,27 +3,36 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "10 10 * * 1-5"
+
 permissions:
   contents: write
+  actions: read
   pages: write
   id-token: write
+
 concurrency:
   group: pages
   cancel-in-progress: true
+
 jobs:
   update-and-deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
       - name: Update Taiwan stock radar v3.0
         run: python scripts/update_data.py
+
       - name: Save updated data
         run: |
           git config user.name "github-actions[bot]"
@@ -32,11 +41,15 @@ jobs:
           git diff --cached --quiet || git commit -m "chore: update Taiwan stock radar v3.0 data"
           git pull --rebase origin main
           git push
+
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: .
+
       - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
