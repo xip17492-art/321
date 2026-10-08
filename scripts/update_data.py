@@ -315,6 +315,29 @@ def main():
         result.append(row)
 
     result.sort(key=lambda z: (z["score"], z.get("ai_probability_5d") or 0, z.get("main_force_score") or 0), reverse=True)
+
+    # 3.1-F：每日 Top 10 與歷史績效回饋。以「推薦後 +2%」作為成功事件，避免把單日大漲誤當成模型勝率。
+    rec_path = Path("data/recommendation_history.json")
+    try: recdb = json.loads(rec_path.read_text(encoding="utf-8"))
+    except Exception: recdb = {"days": [], "model": {}}
+    current = {x["code"]: x for x in result}
+    for day in recdb.get("days", []):
+        for pick in day.get("top10", []):
+            if pick.get("status") == "open" and pick.get("code") in current:
+                now = current[pick["code"]].get("close"); entry = pick.get("entry")
+                if now is not None and entry not in (None, 0):
+                    ret = (now / entry - 1) * 100; age = len(recdb.get("days", [])) - day.get("index", 0)
+                    pick["last_return"] = round(ret,2)
+                    if age >= 3: pick["status"] = "win" if ret >= 2 else "loss"; pick["settled_return"] = round(ret,2)
+    today_top = []
+    for rank,x in enumerate(result[:10],1):
+        today_top.append({"rank":rank,"code":x["code"],"name":x.get("name"),"entry":x.get("close"),"score":x.get("score"),"ai_probability_5d":x.get("ai_probability_5d"),"main_force_score":x.get("main_force_score"),"breakout":x.get("breakout"),"reason":x.get("strategy"),"status":"open"})
+    recdb.setdefault("days",[]).append({"index":len(recdb.get("days",[]))+1,"date":today,"top10":today_top})
+    recdb["days"]=recdb["days"][-120:]
+    settled=[p for d0 in recdb["days"] for p in d0.get("top10",[]) if p.get("status") in ("win","loss")]
+    wins=sum(p.get("status")=="win" for p in settled); total=len(settled)
+    recdb["model"]={"measured":total,"wins":wins,"win_rate":round(wins/total*100,1) if total else None,"target":60,"target_reached":bool(total>=20 and wins/total>=0.6) if total else False,"definition":"T+3 期間內相對推薦價達 +2% 視為成功；至少 20 個已結算樣本才判定是否達 60%。"}
+    rec_path.parent.mkdir(parents=True,exist_ok=True); rec_path.write_text(json.dumps(recdb,ensure_ascii=False),encoding="utf-8")
     payload = {
         "version": "3.1-F",
         "date": today,
