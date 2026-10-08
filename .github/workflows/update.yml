@@ -23,6 +23,8 @@ concurrency:
 jobs:
   update-and-deploy:
     runs-on: ubuntu-latest
+    env:
+      NODE_OPTIONS: --disable-warning=DEP0040
     environment:
       name: github-pages
     steps:
