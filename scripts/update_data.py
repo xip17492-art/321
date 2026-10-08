@@ -279,9 +279,19 @@ def main():
             if vr >= 1.8: score += 15
             elif vr >= 1.5: score += 10
             elif vr >= 1.2: score += 5
-        if x.get("change") is not None and x["change"] >= 5: score += 5
+        if x.get("change") is not None:
+            if x["change"] >= 5: score += 8
+            elif x["change"] >= 3: score += 5
+        if i.get("inst_net") is not None and i.get("inst_net") > 0: score += 4
 
-        breakout = bool(ma20 and x["close"] > ma20 and x.get("high") and x["close"] >= x["high"] * 0.98)
+        prev20 = closes[-21:-1] if len(closes) >= 21 else []
+        prev20_high = max(prev20) if prev20 else None
+        breakout = bool(
+            ma20 and (
+                (prev20_high is not None and x["close"] >= prev20_high * 1.005) or
+                (x["close"] > ma20 * 1.02 and vr is not None and vr >= 1.35)
+            ) and (x.get("change") is None or x.get("change") >= -1.0)
+        )
         overheat = 0
         if rr is not None: overheat += max(0, rr - 65) * 1.35
         if vr is not None: overheat += max(0, vr - 1.5) * 14
@@ -290,7 +300,7 @@ def main():
         overheat = clamp(overheat)
 
         row = {
-            **x, "score": clamp(score), "ma5": ma5, "ma20": ma20, "rsi": rr,
+            **x, "score": clamp(score), "overheat_score": overheat, "ma5": ma5, "ma20": ma20, "rsi": rr,
             "volume_ratio": vr, "breakout": breakout,
             "risk": "high" if overheat >= 75 else ("low" if score >= 75 and overheat < 50 else "medium"),
             "strategy": "突破回測" if breakout and overheat < 70 else ("避免追高" if overheat >= 75 else ("量增觀察" if score >= 70 else "觀察")),
