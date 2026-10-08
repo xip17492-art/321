@@ -1084,9 +1084,30 @@
       "published": "Tue, 21 Jul 2026 07:00:00 GMT",
       "analyst": null,
       "codes": []
+    },
+    {
+      "title": "【美股新聞】華爾街頂級分析師最推薦的五支股票! (2023.3.27) - 美股放大鏡",
+      "url": "https://news.google.com/rss/articles/CBMiywJBVV95cUxOZnhIb3dJZ2Vyc2R1MkRoN0JOTnBzQnR1cEo2NlZwZktsNjJYQzVSUHh5QlVySDNXeTRxRG54MElqQ1VNN01MSzdkcmZBYzVFQkkxc0NUY0pabXlWRURhaWx4cHRpTHRkYkI4S25ubkZWTGpBN1JKRXF5N2NvVGU1OGRnLWJJSXhhZUxORzk5eUdXUVRrMExLeTV1aHRiUUJybFZJWHJPbHRBWUkweVRGS2UxWFM5QWV1WGFLX1pmMzlzelJubk1ZSi1FVWtOblgyZlpPTGVTaFdEM0NQdDZzQ2o1WjBrbWtPdmJfOFROcC1WZnBBdThObFB2M1NFSV95Vy00azNkNlNUNjBKbno1ZDFmdW5nSWNLcmRpR1BBYktPZ21rQ3hITzNSZWVwN1d0SHhLeTRkeXhUS1lubmZiMEo5cE5kZzJhVm13?oc=5",
+      "published": "Mon, 27 Mar 2023 07:00:00 GMT",
+      "analyst": "最推薦的五支股票",
+      "codes": [
+        "2023"
+      ]
     }
   ],
-  "analysts": {},
-  "last_scan": "2026-10-08T19:05+00:00",
+  "analysts": {
+    "最推薦的五支股票": {
+      "recommendations": 1,
+      "measurable": 0,
+      "wins": 0,
+      "avg_return": null,
+      "stocks": {
+        "2023": 1
+      },
+      "win_rate": null,
+      "confidence": "樣本不足"
+    }
+  },
+  "last_scan": "2026-10-08T19:09+00:00",
   "method": "只有具備可辨識分析師與股票代號的公開文章才進入追蹤；未完成 T+1/T+3/T+5 前不計勝率。"
 }
