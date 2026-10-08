@@ -30,15 +30,15 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Update Taiwan stock radar v3.0
+      - name: Update Taiwan stock radar v3.1-F
         run: python scripts/update_data.py
 
       - name: Save updated data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/data.json
-          git diff --cached --quiet || git commit -m "chore: update Taiwan stock radar v3.0 data"
+          git add data/data.json data/recommendation_history.json data/analyst_tracker.json
+          git diff --cached --quiet || git commit -m "chore: update Taiwan stock radar v3.1-F data"
           git pull --rebase origin main
           git push
 
