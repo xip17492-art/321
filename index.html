@@ -83,7 +83,7 @@ function showDetail(code){
  '<div class="row"><span>營收 YoY</span><b>'+n(x.revenue_yoy)+'%</b></div></div>'+
  '<div class="st" style="margin-top:12px">📈 近60筆價格趨勢</div><div class="spark">'+svg+'</div>'+
  '<div class="notice" style="margin-top:10px">'+sig(x)+'　<b>'+action+'</b><br>AI數值是本網站多因子模型的偏多分數，不代表保證上漲；盤後資料會由 GitHub Actions 更新。點擊其他股票可切換分析。</div>';
- p.style.display='block';p.scrollIntoView({behavior:'smooth',block:'start');
+ p.style.display='block';p.scrollIntoView({behavior:'smooth',block:'start'});
 }
 function resetView(){FILTER='all';const q=document.getElementById('searchBox');if(q)q.value='';const so=document.getElementById('sortBox');if(so)so.value='adaptive';document.querySelectorAll('.filters button').forEach(x=>x.classList.remove('active'));document.querySelector('.filters button')?.classList.add('active');render()}
 async function enableNotify(){if(!('Notification'in window)){alert('此瀏覽器不支援通知');return}const p=await Notification.requestPermission();document.getElementById('notifyBtn').textContent=p==='granted'?'已開啟':'未開啟'}
