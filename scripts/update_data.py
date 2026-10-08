@@ -3,6 +3,7 @@ import math
 from datetime import datetime
 from pathlib import Path
 from urllib.request import Request, urlopen
+import subprocess
 
 OUT = Path("data/data.json")
 UA = "Mozilla/5.0 (GitHub Actions; Taiwan Stock Radar 321 v3.0)"
@@ -294,6 +295,7 @@ def main():
             "risk": "high" if overheat >= 75 else ("low" if score >= 75 and overheat < 50 else "medium"),
             "strategy": "突破回測" if breakout and overheat < 70 else ("避免追高" if overheat >= 75 else ("量增觀察" if score >= 70 else "觀察")),
             "history_close": closes[-120:], "history_volume": vols[-120:],
+            "history_date": (list(prev.get("history_date", [])) + [today])[-120:],
             "inst_net": i.get("inst_net"), "foreign_net": i.get("foreign_net"),
             "trust_net": i.get("trust_net"), "dealer_net": i.get("dealer_net"),
             "margin_balance": m.get("margin_balance"), "short_balance": m.get("short_balance"),
@@ -314,19 +316,24 @@ def main():
 
     result.sort(key=lambda z: (z["score"], z.get("ai_probability_5d") or 0, z.get("main_force_score") or 0), reverse=True)
     payload = {
-        "version": "3.0",
+        "version": "3.1-F",
         "date": today,
         "updated_at": datetime.now().astimezone().isoformat(timespec="minutes"),
         "data_notes": {
             "main_force": "主力籌碼為量價＋法人推估，不等同逐家券商分點。",
             "ai": "AI預測為本機多因子統計模型，非保證獲利，也不是大型語言模型。",
-            "realtime": "GitHub Pages 的日資料為盤後資料；盤中即時報價需由瀏覽器直接連接 TWSE MIS 或正式即時行情服務。"
+            "realtime": "GitHub Pages 的日資料為盤後資料；盤中即時報價需由瀏覽器直接連接 TWSE MIS 或正式即時行情服務。",
+            "recommendation_engine": "Top 10 會以歷史推薦結果做樣本外績效追蹤；勝率達標是模型驗證門檻，不保證未來獲利。"
         },
         "stocks": result
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
     print("Updated", len(result), "stocks")
+    try:
+        subprocess.run(["python", "scripts/analyst_tracker.py"], check=False)
+    except Exception as e:
+        print("Analyst tracker unavailable:", e)
 
 if __name__ == "__main__":
     main()
