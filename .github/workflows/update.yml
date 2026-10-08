@@ -25,6 +25,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NODE_OPTIONS: --disable-warning=DEP0040
+      GIT_CONFIG_COUNT: 1
+      GIT_CONFIG_KEY_0: advice.defaultBranchName
+      GIT_CONFIG_VALUE_0: "false"
     environment:
       name: github-pages
     steps:
