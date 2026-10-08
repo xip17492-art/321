@@ -314,7 +314,24 @@ def main():
         )
         result.append(row)
 
-    result.sort(key=lambda z: (z["score"], z.get("ai_probability_5d") or 0, z.get("main_force_score") or 0), reverse=True)
+    # 3.1-F 自適應權重：用已結算推薦的條件成功率微調下一輪排序；樣本少於 10 不調整，避免過度擬合。
+    rec_path = Path("data/recommendation_history.json")
+    try: recdb_pre = json.loads(rec_path.read_text(encoding="utf-8"))
+    except Exception: recdb_pre = {"days":[]}
+    settled_pre=[p for d0 in recdb_pre.get("days",[]) for p in d0.get("top10",[]) if p.get("status") in ("win","loss")]
+    factors={k:[0,0] for k in ("ai","breakout","chips","inst","low_heat")}
+    for p in settled_pre:
+        win=1 if p.get("status")=="win" else 0
+        for k,yes in (("ai",(p.get("ai_probability_5d") or 0)>=68),("breakout",bool(p.get("breakout"))),("chips",(p.get("main_force_score") or 0)>=70),("inst",bool(p.get("inst_net")) and p.get("inst_net")>0),("low_heat",True)):
+            if yes:factors[k][0]+=win;factors[k][1]+=1
+    adaptive=[]
+    for x in result:
+        bonus=0
+        for k,yes in (("ai",(x.get("ai_probability_5d") or 0)>=68),("breakout",bool(x.get("breakout"))),("chips",(x.get("main_force_score") or 0)>=70),("inst",bool(x.get("inst_net")) and x.get("inst_net")>0),("low_heat",(x.get("overheat_score") or 100)<70)):
+            w,n0=factors[k]
+            if n0>=10: bonus += max(-5,min(5,(w/n0-0.5)*10)) if yes else 0
+        x["adaptive_bonus"]=round(bonus,2); x["adaptive_score"]=round((x.get("score") or 0)+bonus,2); adaptive.append(x)
+    result.sort(key=lambda z: (z.get("adaptive_score",z["score"]), z.get("ai_probability_5d") or 0, z.get("main_force_score") or 0), reverse=True)
 
     # 3.1-F：每日 Top 10 與歷史績效回饋。以「推薦後 +2%」作為成功事件，避免把單日大漲誤當成模型勝率。
     rec_path = Path("data/recommendation_history.json")
