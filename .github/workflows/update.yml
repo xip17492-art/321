@@ -1,6 +1,12 @@
 name: Daily Taiwan Stock Radar v3
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'scripts/**'
+      - '.github/workflows/**'
   schedule:
     - cron: "10 10 * * 1-5"
 
@@ -30,15 +36,33 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Update Taiwan stock radar v3.1-F
+      - name: Update Taiwan stock radar v3.2-F
         run: python scripts/update_data.py
+
+      - name: Validate generated radar data
+        run: |
+          python -m py_compile scripts/update_data.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("data/data.json").read_text())
+          required=["code","name","score"]
+          stocks=d.get("stocks", d if isinstance(d,list) else [])
+          assert isinstance(stocks,list) and stocks, "data.json has no stock records"
+          missing=[k for k in required if k not in stocks[0]]
+          assert not missing, f"missing required fields: {missing}"
+          factor_fields=["momentum_5d","momentum_20d","momentum_60d","volatility_20d","high_52w_distance","relative_strength_20d","avg_turnover_20d","research_factor_score"]
+          present=sum(1 for k in factor_fields if k in stocks[0])
+          assert present >= 6, f"new factor fields incomplete: {present}/{len(factor_fields)}"
+          print(f"VALIDATION OK: {len(stocks)} stocks; factor fields {present}/{len(factor_fields)}")
+          PY
 
       - name: Save updated data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/data.json data/recommendation_history.json data/analyst_tracker.json
-          git diff --cached --quiet || git commit -m "chore: update Taiwan stock radar v3.1-F data"
+          git diff --cached --quiet || git commit -m "chore: update Taiwan stock radar v3.2-F data"
           git pull --rebase origin main
           git push
 
