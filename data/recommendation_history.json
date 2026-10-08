@@ -1,0 +1,10 @@
+{
+  "days": [],
+  "model": {
+    "measured": 0,
+    "wins": 0,
+    "win_rate": null,
+    "target": 60,
+    "target_reached": false
+  }
+}
