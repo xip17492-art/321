@@ -1191,6 +1191,27 @@
       "published": "Thu, 26 Feb 2026 08:00:00 GMT",
       "analyst": null,
       "codes": []
+    },
+    {
+      "title": "台股飆新高還可以買什麼？分析師曝6月漲價概念股有這些… - 經濟日報",
+      "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE1kY1pYN2hnMjZDQ2s4dnpvUlZCeTBCUEtnSkNpVE9VdUpEN1VpT3doS1FLNzcwUVBXYnR5V3h3bm9DbnBmcjdCWkoyZDVHZGtZd3JiN296QWY3QdIBX0FVX3lxTE9PNFVLZGFDdHcybF8zakVucHFkb1puNVBWbWFLbUxEUk9zbUlYaC1qY2w0c0hJVFlob3d5N3RiM0Fmc21RTF8tc1VwSUkxeXB1N3Vxa1hrVlFaLUlYSzRZ?oc=5",
+      "published": "Mon, 25 May 2026 07:00:00 GMT",
+      "analyst": null,
+      "codes": []
+    },
+    {
+      "title": "「鑽石ZAi」推薦日本兩大型股 INPEX與Oriental Land獲分析師買進評等 - PChome Online 新聞",
+      "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxNVE1zWlZOUm9QOXlJTENnRHp5RXZGeEtzUlNCVzJkb2ZPcnphVTVGYnhDdUQ2NGs3dk0yaTAzTEs0YUhORUxyN1U5NTBNQlJZdk9wbUJWYlNzSWtTdnFaWnlRZzB2N1BqTV9BeVg2YV9CT21uZ3JnX2Y3VXhvZV9MQ3F0MTV1LUhuNTlVQw?oc=5",
+      "published": "Mon, 28 Sep 2026 07:00:43 GMT",
+      "analyst": null,
+      "codes": []
+    },
+    {
+      "title": "台積電法說會前夕，這些股票依然狂漲！ - 鉅亨網",
+      "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE04eGctempIaDVSdHZQTGc0V19yLVI1SUp6WC1VeFF5QUlJc0dXWVdMWUtvLTVDanZ2QlAxdVJoVTJvYWRDOGNSWnRjQ2hRT28?oc=5",
+      "published": "Wed, 15 Apr 2026 07:00:00 GMT",
+      "analyst": null,
+      "codes": []
     }
   ],
   "analysts": {
@@ -1206,6 +1227,6 @@
       "confidence": "樣本不足"
     }
   },
-  "last_scan": "2026-10-09T11:30+00:00",
+  "last_scan": "2026-10-09T11:32+00:00",
   "method": "只有具備可辨識分析師與股票代號的公開文章才進入追蹤；未完成 T+1/T+3/T+5 前不計勝率。"
 }
