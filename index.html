@@ -48,6 +48,18 @@
 <footer>321 Taiwan Stock Radar v3.2-F｜研究與資訊整理工具，不構成投資建議</footer></div>
 <script src="./data/bootstrap.js?v=3.2-F"></script>
 <script>
+window.addEventListener('error',function(e){
+  var status=document.getElementById('status');
+  if(status)status.textContent='前端程式錯誤：'+(e.message||'JavaScript error');
+  var rows=document.getElementById('rows');
+  if(rows)rows.innerHTML='<tr><td colspan="24">頁面程式執行失敗：'+String(e.message||'JavaScript error').replace(/[<>&]/g,'')+'。請截圖回報。</td></tr>';
+  console.error('Radar frontend error',e.message,e.filename,e.lineno);
+});
+window.addEventListener('unhandledrejection',function(e){
+  console.error('Radar promise rejection',e.reason);
+});
+</script>
+<script>
 let DATA=(window.RADAR_BOOTSTRAP&&Array.isArray(window.RADAR_BOOTSTRAP.stocks))?window.RADAR_BOOTSTRAP.stocks:[],FILTER='all',HISTORY={},ANALYST={},lastAlert={};const n=v=>v==null?'—':Number(v).toLocaleString('zh-TW',{maximumFractionDigits:1});
 function setFilter(f,b){FILTER=f;document.querySelectorAll('.filters button').forEach(x=>x.classList.remove('active'));if(b)b.classList.add('active');render();document.querySelector('.table-scroll').scrollIntoView({behavior:'smooth',block:'start'})}
 function setFilterById(f){const b=[...document.querySelectorAll('.filters button')].find(x=>x.getAttribute('onclick')==="setFilter('"+f+"',this)");setFilter(f,b)}
