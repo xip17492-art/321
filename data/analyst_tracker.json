@@ -1212,6 +1212,34 @@
       "published": "Wed, 15 Apr 2026 07:00:00 GMT",
       "analyst": null,
       "codes": []
+    },
+    {
+      "title": "香港股票分析師協會主辦環球投資高峰會 積極推投資者教育 - hkcna.hk",
+      "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE9ibE5tM3NIZnN0amg4WHVNdWtObmRXU3loTmYzMERSeTEyOTB1TDhjRFZLUEw5ek1GSUJpMlNxQnRBUDItUFlHWDl2bllXVmRiNld1aEpDbFBKSG1fNC1HZVd1Zm1ud2UtcEhRSWhLdw?oc=5",
+      "published": "Mon, 27 Jul 2026 07:00:00 GMT",
+      "analyst": null,
+      "codes": []
+    },
+    {
+      "title": "美光躍居「市場最重要股票」分析師：股價仍遭低估 - 鉅亨網",
+      "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE9yS0ZqUmRsNlpFU0Zya2FKY3VET04zUko2WmtKaEpFcEpWOGU5aF9EV2djUW04TF92ZURNdEN1NEdoZDdFM3gzVnVZbmtKU2s?oc=5",
+      "published": "Fri, 17 Jul 2026 07:00:00 GMT",
+      "analyst": null,
+      "codes": []
+    },
+    {
+      "title": "美光躍居「市場最重要股票」分析師：股價仍遭低估 - 鉅亨網",
+      "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE9yS0ZqUmRsNlpFU0Zya2FKY3VET04zUko2WmtKaEpFcEpWOGU5aF9EV2djUW04TF92ZURNdEN1NEdoZDdFM3gzVnVZbmtKU2s?oc=5",
+      "published": "Fri, 17 Jul 2026 07:00:00 GMT",
+      "analyst": null,
+      "codes": []
+    },
+    {
+      "title": "華爾街堅定看好AI硬體製造商！值得繼續持有股票、看好模型競爭利多晶片 - 鉅亨網",
+      "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTFAxYTBBY0dpUExramh3Y3pIQVJZcXRjQU9ZTDFNWVNwVXUwT0Fjakk0WnlTVVd6SWpKY0tXT3FRNXBTcDZTN2s2bWR1LWRIZVE?oc=5",
+      "published": "Thu, 23 Jul 2026 07:00:00 GMT",
+      "analyst": null,
+      "codes": []
     }
   ],
   "analysts": {
@@ -1227,6 +1255,6 @@
       "confidence": "樣本不足"
     }
   },
-  "last_scan": "2026-10-09T11:43+00:00",
+  "last_scan": "2026-10-09T14:21+00:00",
   "method": "只有具備可辨識分析師與股票代號的公開文章才進入追蹤；未完成 T+1/T+3/T+5 前不計勝率。"
 }
