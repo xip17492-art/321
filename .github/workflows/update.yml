@@ -51,7 +51,7 @@ jobs:
           from pathlib import Path
           payload=json.loads(Path("data/data.json").read_text(encoding="utf-8"))
           assert isinstance(payload.get("stocks"), list) and payload["stocks"], "No stock data for offline bootstrap"
-          Path("data/bootstrap.js").write_text("window.RADAR_BOOTSTRAP = "+json.dumps(payload,ensure_ascii=False,separators=(",",":"))+";\\n",encoding="utf-8")
+          Path("data/bootstrap.js").write_text("window.RADAR_BOOTSTRAP = "+json.dumps(payload,ensure_ascii=False,separators=(",",":"))+";\n",encoding="utf-8")
           print("BOOTSTRAP OK:",len(payload["stocks"]),"stocks")
           PY
 
