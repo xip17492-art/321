@@ -51,7 +51,7 @@ jobs:
           from pathlib import Path
           payload=json.loads(Path("data/data.json").read_text(encoding="utf-8"))
           assert isinstance(payload.get("stocks"), list) and payload["stocks"], "No stock data for offline bootstrap"
-          Path("data/bootstrap.js").write_text("window.RADAR_BOOTSTRAP = "+json.dumps(payload,ensure_ascii=False,separators=(",",":"))+";\n",encoding="utf-8")
+          Path("data/bootstrap.js").write_text("window.RADAR_BOOTSTRAP = "+json.dumps(payload,ensure_ascii=False,separators=(",",":"))+";\\n",encoding="utf-8")
           print("BOOTSTRAP OK:",len(payload["stocks"]),"stocks")
           PY
 
@@ -72,6 +72,41 @@ jobs:
           assert present >= 6, f"new factor fields incomplete: {present}/{len(factor_fields)}"
           print(f"VALIDATION OK: {len(stocks)} stocks; factor fields {present}/{len(factor_fields)}")
           PY
+
+      - name: Validate inline JavaScript syntax
+        run: |
+          python - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+          class Scripts(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.current = None
+                  self.scripts = []
+              def handle_starttag(self, tag, attrs):
+                  if tag.lower() == "script":
+                      attrs = dict(attrs)
+                      self.current = [] if not attrs.get("src") else None
+              def handle_data(self, data):
+                  if self.current is not None:
+                      self.current.append(data)
+              def handle_endtag(self, tag):
+                  if tag.lower() == "script":
+                      if self.current is not None:
+                          self.scripts.append("".join(self.current))
+                      self.current = None
+          parser = Scripts()
+          parser.feed(Path("index.html").read_text(encoding="utf-8"))
+          inline = [s for s in parser.scripts if s.strip()]
+          assert inline, "No inline scripts found"
+          for i, script in enumerate(inline, 1):
+              Path(f"/tmp/radar-inline-{i}.js").write_text(script, encoding="utf-8")
+          print(f"Checking {len(inline)} inline scripts with node --check")
+          PY
+          for f in /tmp/radar-inline-*.js; do
+            echo "Checking $f"
+            node --check "$f"
+          done
 
       - name: Save updated data
         run: |
