@@ -305,17 +305,34 @@ def twse_bulk_history(calendar_days=100):
                 payload = get_json(url)
                 fields = None
                 rows = None
-                # TWSE's response table keys can vary; identify the table by its field names.
+                # TWSE has returned both flat dataN/fieldsN pairs and nested tables:[{fields,data}] payloads.
+                candidates = []
+                def collect_tables(node):
+                    if isinstance(node, dict):
+                        candidate_fields = node.get("fields")
+                        candidate_rows = node.get("data")
+                        if isinstance(candidate_fields, list) and isinstance(candidate_rows, list):
+                            candidates.append((candidate_fields, candidate_rows))
+                        for child in node.values():
+                            if isinstance(child, (dict, list)):
+                                collect_tables(child)
+                    elif isinstance(node, list):
+                        for child in node:
+                            if isinstance(child, (dict, list)):
+                                collect_tables(child)
+                collect_tables(payload)
+                # Keep compatibility with the flat fieldsN/dataN response format.
                 for key, value in payload.items():
-                    if not (isinstance(value, list) and value and isinstance(value[0], list)):
+                    if not str(key).startswith("data") or not (isinstance(value, list) and value and isinstance(value[0], list)):
                         continue
-                    fkey = key.replace("data", "fields")
-                    candidate_fields = payload.get(fkey)
-                    if not isinstance(candidate_fields, list):
-                        continue
+                    suffix = str(key)[4:]
+                    candidate_fields = payload.get("fields" + suffix)
+                    if isinstance(candidate_fields, list):
+                        candidates.append((candidate_fields, value))
+                for candidate_fields, candidate_rows in candidates:
                     fs = [str(x).replace(" ", "") for x in candidate_fields]
-                    if any("證券代號" in x for x in fs) and any("收盤價" in x for x in fs):
-                        fields, rows = candidate_fields, value
+                    if any("證券代號" in x for x in fs) and any("收盤價" in x for x in fs) and candidate_rows:
+                        fields, rows = candidate_fields, candidate_rows
                         break
                 if fields and rows:
                     code_i = pick_index(fields, "證券代號")
@@ -357,7 +374,7 @@ def main():
 
     # Backfill when most saved records have not yet accumulated enough sessions for 20/60-day factors.
     history_lengths = [len(x.get("history_close", [])) for x in old.get("stocks", []) if x.get("history_close")]
-    if len(history_lengths) < max(100, int(len(quotes) * 0.25)) or (history_lengths and median(history_lengths) < 61):
+    if len(history_lengths) < max(100, int(len(quotes) * 0.25)) or (history_lengths and median(history_lengths) < 90):
         bulk_history = twse_bulk_history(calendar_days=100)
     else:
         bulk_history = {}
