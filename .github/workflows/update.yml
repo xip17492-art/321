@@ -70,7 +70,14 @@ jobs:
           factor_fields=["momentum_5d","momentum_20d","momentum_60d","volatility_20d","high_52w_distance","relative_strength_20d","avg_turnover_20d","research_factor_score"]
           present=sum(1 for k in factor_fields if k in stocks[0])
           assert present >= 6, f"new factor fields incomplete: {present}/{len(factor_fields)}"
-          print(f"VALIDATION OK: {len(stocks)} stocks; factor fields {present}/{len(factor_fields)}")
+          technical_fields=["trendline_breakout","above_month_line","technical_setup","industry_chain"]
+          missing_technical=[k for k in technical_fields if k not in stocks[0]]
+          assert not missing_technical, f"missing technical fields: {missing_technical}"
+          chains=d.get("industry_chains", [])
+          assert isinstance(chains, list) and chains, "industry_chains missing or empty"
+          for chain in chains:
+              assert "industry_chain" in chain and "avg_change_pct" in chain, "invalid industry chain record"
+          print(f"VALIDATION OK: {len(stocks)} stocks; factor fields {present}/{len(factor_fields)}; technical fields {len(technical_fields)}/{len(technical_fields)}; industry chains {len(chains)}")
           PY
 
       - name: Validate inline JavaScript syntax
