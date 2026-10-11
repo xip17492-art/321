@@ -309,7 +309,12 @@ def main():
         # TWSE Change 是價差金額，統一換算成漲跌幅，避免以金額誤判百分比門檻。
         raw_change = x.get("change")
         # 優先使用交易所當日價差推算前收，避免同日重跑時拿已更新的收盤價當前收。
-        prior_close = (x["close"] - raw_change) if raw_change is not None else (closes[-1] if closes else None)
+        if raw_change is not None:
+            prior_close = x["close"] - raw_change
+        elif closes:
+            prior_close = closes[-2] if len(closes) >= 2 and closes[-1] == x["close"] else closes[-1]
+        else:
+            prior_close = None
         if prior_close not in (None, 0):
             x["change"] = round((x["close"] / prior_close - 1) * 100, 2)
         else:
