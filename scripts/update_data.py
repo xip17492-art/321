@@ -308,10 +308,9 @@ def main():
         vols = list(prev.get("history_volume", []))[-251:]
         # TWSE Change 是價差金額，統一換算成漲跌幅，避免以金額誤判百分比門檻。
         raw_change = x.get("change")
-        prior_close = closes[-1] if closes else (x["close"] - raw_change if raw_change is not None else None)
-        if raw_change is not None and prior_close not in (None, 0):
-            x["change"] = round((x["close"] / prior_close - 1) * 100, 2)
-        elif prior_close not in (None, 0):
+        # 優先使用交易所當日價差推算前收，避免同日重跑時拿已更新的收盤價當前收。
+        prior_close = (x["close"] - raw_change) if raw_change is not None else (closes[-1] if closes else None)
+        if prior_close not in (None, 0):
             x["change"] = round((x["close"] / prior_close - 1) * 100, 2)
         else:
             x["change"] = None
