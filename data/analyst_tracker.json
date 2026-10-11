@@ -1443,6 +1443,20 @@
       "published": "Mon, 13 Dec 2021 08:00:00 GMT",
       "analyst": null,
       "codes": []
+    },
+    {
+      "title": "郭哲榮喊「95％股票在谷底」挨酸！網不解：隨便買都賺？ - UDN",
+      "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTFAzazVJNDdWWk5Ecnp2S0dDdmhRSHJsT2FlLWlDWnUwWkdIR1JCam1XOG43aEgzV1czRlBhUk5ONW5LblFwbGFWaWxIOWtqWVdDZ3c?oc=5",
+      "published": "Thu, 20 Aug 2026 07:00:00 GMT",
+      "analyst": null,
+      "codes": []
+    },
+    {
+      "title": "買輝達太冒險？分析師選「這3檔」更值得長抱股票：這公司靠AI獲利翻倍 - 三立新聞網SETN.com",
+      "url": "https://news.google.com/rss/articles/CBMiSEFVX3lxTFBwTmsyYlFMZWxTU3g3YnBCRzZWTER0YVFQVll2dkNCMmZqaUFvbDVnNzRfWGM4NnBEMEZSRE9rZ3VCOC1oUF9yQ9IBTEFVX3lxTE92em5EY1RnSDkwd191SURRSnVxZlBZaVlmRUtxdnlpeC14cVZ0ZGljVlhvWGZpaGJBUnN1eHhSeWJGLUMzM082ci1YZWw?oc=5",
+      "published": "Thu, 09 Apr 2026 07:00:00 GMT",
+      "analyst": null,
+      "codes": []
     }
   ],
   "analysts": {
@@ -1458,6 +1472,6 @@
       "confidence": "樣本不足"
     }
   },
-  "last_scan": "2026-10-11T11:59+00:00",
+  "last_scan": "2026-10-11T13:49+00:00",
   "method": "只有具備可辨識分析師與股票代號的公開文章才進入追蹤；未完成 T+1/T+3/T+5 前不計勝率。"
 }
