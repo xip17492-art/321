@@ -304,8 +304,17 @@ def main():
 
     for x in quotes:
         prev = oldmap.get(x["code"], {})
-        closes = list(prev.get("history_close", []))[-119:]
-        vols = list(prev.get("history_volume", []))[-119:]
+        closes = list(prev.get("history_close", []))[-251:]
+        vols = list(prev.get("history_volume", []))[-251:]
+        # TWSE Change 是價差金額，統一換算成漲跌幅，避免以金額誤判百分比門檻。
+        raw_change = x.get("change")
+        prior_close = closes[-1] if closes else (x["close"] - raw_change if raw_change is not None else None)
+        if raw_change is not None and prior_close not in (None, 0):
+            x["change"] = round((x["close"] / prior_close - 1) * 100, 2)
+        elif prior_close not in (None, 0):
+            x["change"] = round((x["close"] / prior_close - 1) * 100, 2)
+        else:
+            x["change"] = None
         if not closes or closes[-1] != x["close"]:
             closes.append(x["close"])
         if not vols or vols[-1] != (x.get("volume") or 0):
@@ -350,12 +359,31 @@ def main():
 
         prev20 = closes[-21:-1] if len(closes) >= 21 else []
         prev20_high = max(prev20) if prev20 else None
-        breakout = bool(
+        breakout_base = bool(
             ma20 and (
                 (prev20_high is not None and x["close"] >= prev20_high * 1.005) or
                 (x["close"] > ma20 * 1.02 and vr is not None and vr >= 1.35)
             ) and (x.get("change") is None or x.get("change") >= -1.0)
         )
+        # 從近60個交易日找局部高點，使用最近兩個較低高點外推下降壓力線。
+        trend_closes = closes[-60:]
+        pivot_highs = []
+        for pi in range(2, len(trend_closes) - 2):
+            ph = trend_closes[pi]
+            if ph >= max(trend_closes[pi-2:pi]) and ph >= max(trend_closes[pi+1:pi+3]):
+                pivot_highs.append((pi, ph))
+        descending_line = None
+        if len(pivot_highs) >= 2:
+            p1, p2 = pivot_highs[-2], pivot_highs[-1]
+            if p2[1] < p1[1] and p2[0] > p1[0]:
+                slope = (p2[1] - p1[1]) / (p2[0] - p1[0])
+                descending_line = p2[1] + slope * (len(trend_closes) - 1 - p2[0])
+        trendline_breakout = bool(
+            descending_line is not None and ma20 is not None and
+            x["close"] > descending_line * 1.005 and x["close"] > ma20
+        )
+        above_month_line = bool(ma20 is not None and x["close"] > ma20)
+        breakout = bool(breakout_base or trendline_breakout)
         overheat = 0
         if rr is not None: overheat += max(0, rr - 65) * 1.35
         if vr is not None: overheat += max(0, vr - 1.5) * 14
@@ -366,6 +394,10 @@ def main():
         row = {
             **x, "score": clamp(score), "overheat_score": overheat, "ma5": ma5, "ma20": ma20, "rsi": rr,
             "volume_ratio": vr, "breakout": breakout,
+            "breakout_base": breakout_base, "trendline_breakout": trendline_breakout,
+            "descending_trendline_price": round(descending_line, 3) if descending_line is not None else None,
+            "above_month_line": above_month_line,
+            "technical_setup": "下降趨勢線突破＋站上月線" if trendline_breakout else ("站上月線" if above_month_line else "月線下方"),
             "risk": "high" if overheat >= 75 else ("low" if score >= 75 and overheat < 50 else "medium"),
             "strategy": "突破回測" if breakout and overheat < 70 else ("避免追高" if overheat >= 75 else ("量增觀察" if score >= 70 else "觀察")),
             "history_close": closes[-252:], "history_volume": vols[-252:],
@@ -407,6 +439,49 @@ def main():
         x["liquidity_floor_20d"] = liquidity_floor
         x["liquidity_ok"] = bool(x.get("avg_turnover_20d") is not None and liquidity_floor is not None and x["avg_turnover_20d"] >= liquidity_floor)
         x["market_regime"] = "偏多" if market_mom20 is not None and market_mom20 >= 2 else ("偏空" if market_mom20 is not None and market_mom20 <= -2 else "中性")
+
+    # 產業鏈標籤：只對常見台股代號/名稱做保守分類，未知者不猜測。
+    sector_codes = {
+        "半導體": {"2330","2454","3711","3443","5274","3529","3661","6510","6533","晶圓","封測","IC設計"},
+        "AI伺服器／ODM": {"2317","2382","3231","6669","緯創","廣達","英業達","鴻海","技嘉","華碩"},
+        "PCB／載板": {"3037","8046","3189","2368","4958","欣興","南電","景碩","臻鼎","華通"},
+        "散熱": {"3017","3324","3653","2421","雙鴻","奇鋐","健策","建準"},
+        "電源／重電": {"2308","2301","1519","1503","1513","台達電","光寶科","華城","士電"},
+        "光通訊": {"3081","4979","6442","3163","3363","波若威","新復興","光聖"},
+        "記憶體": {"2408","2344","8299","2337","4967","南亞科","華邦電","群聯","十銓"},
+        "機器人／自動化": {"2049","1590","2395","6166","直得","上銀","所羅門"},
+        "金融": {"2881","2882","2884","2886","2891","2892","2883","2885"},
+        "航運": {"2603","2609","2615","2618","2637","2606"},
+        "生技醫療": {"6547","4743","6472","4162","6446","藥華藥","晶碩"},
+        "汽車／電動車": {"2207","2231","1513","1536","裕日車","和大","貿聯"},
+        "塑化／原物料": {"1301","1303","1326","6505","台塑","南亞","台化","台塑化"}
+    }
+    def classify_sector(stock):
+        code, name = str(stock.get("code", "")), str(stock.get("name", ""))
+        for sector, keys in sector_codes.items():
+            if code in keys or any(k in name for k in keys if not k.isdigit()):
+                return sector
+        return "其他／未分類"
+    for stock in result:
+        stock["industry_chain"] = classify_sector(stock)
+    sector_stats = {}
+    for stock in result:
+        sector = stock["industry_chain"]
+        s = sector_stats.setdefault(sector, {"industry_chain": sector, "count": 0, "change_sum": 0.0, "change_n": 0, "up": 0, "down": 0, "flat": 0})
+        s["count"] += 1
+        ch = stock.get("change")
+        if ch is not None:
+            s["change_sum"] += ch
+            s["change_n"] += 1
+            if ch > 0: s["up"] += 1
+            elif ch < 0: s["down"] += 1
+            else: s["flat"] += 1
+    industry_chains = []
+    for s in sector_stats.values():
+        s["avg_change_pct"] = round(s["change_sum"] / s["change_n"], 2) if s["change_n"] else None
+        del s["change_sum"], s["change_n"]
+        industry_chains.append(s)
+    industry_chains.sort(key=lambda s: (s["avg_change_pct"] is not None, s["avg_change_pct"] or -999), reverse=True)
 
     m5 = [x.get("momentum_5d") for x in result]
     m20 = [x.get("momentum_20d") for x in result]
@@ -511,7 +586,8 @@ def main():
     recdb["model"]={"measured":total,"wins":wins,"win_rate":round(wins/total*100,1) if total else None,"target":60,"target_reached":bool(total>=20 and wins/total>=0.6) if total else False,"definition":"T+3 期間內相對推薦價達 +2% 視為成功；至少 20 個已結算樣本才判定是否達 60%。"}
     rec_path.parent.mkdir(parents=True,exist_ok=True); rec_path.write_text(json.dumps(recdb,ensure_ascii=False),encoding="utf-8")
     payload = {
-        "version": "3.2-F",
+        "version": "3.3",
+        "industry_chains": industry_chains,
         "date": today,
         "updated_at": datetime.now().astimezone().isoformat(timespec="minutes"),
         "data_notes": {
@@ -519,7 +595,7 @@ def main():
             "ai": "AI預測為本機多因子統計模型，非保證獲利，也不是大型語言模型。",
             "realtime": "GitHub Pages 的日資料為盤後資料；盤中即時報價需由瀏覽器直接連接 TWSE MIS 或正式即時行情服務。",
             "recommendation_engine": "Top 10 以歷史推薦結果做樣本外 T+3 績效追蹤；因子快照同步保存，factor_validation 只使用已結算樣本。",
-            "factor_engine": "3.2-F 新增 5/20/60 日動能、52週高點距離（資料不足時以近120日代理）、20日年化波動度、20日平均成交金額流動性過濾、全市場截面中位數相對強弱。流動性過濾影響推薦池，不刪除總表。"
+            "factor_engine": "3.3 新增產業鏈漲幅、下降趨勢線突破＋站上月線判定，並修正每日漲跌幅換算；保留 5/20/60 日動能、52週高點距離（資料不足時以近120日代理）、20日年化波動度、20日平均成交金額流動性過濾、全市場截面中位數相對強弱。流動性過濾影響推薦池，不刪除總表。"
         },
         "stocks": result
     }
