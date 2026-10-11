@@ -12,7 +12,7 @@
 <div class="card metric-btn" onclick="setFilterById('hot')" title="查看爆發股票"><div class="muted">🔥 爆發 ≥80</div><div class="num green" id="hot">—</div></div>
 <div class="card metric-btn" onclick="setFilterById('breakout')" title="查看突破股票"><div class="muted">🚀 突破</div><div class="num yellow" id="breakout">—</div></div>
 <div class="card metric-btn" onclick="setFilterById('overheat')" title="查看過熱股票"><div class="muted">⚠️ 過熱 ≥75</div><div class="num red" id="overheat">—</div></div>
-<div class="card metric-btn" onclick="setFilterById('ai')" title="查看 AI 偏多股票"><div class="muted">🤖 AI偏多 ≥68%</div><div class="num blue" id="aibull">—</div></div>
+<div class="card metric-btn" onclick="setFilterById('ai')" title="查看 AI 偏多股票"><div class="muted">🤖 AI偏多分數 ≥68</div><div class="num blue" id="aibull">—</div></div>
 <div class="card metric-btn" onclick="document.getElementById('feedback').scrollIntoView({behavior:'smooth'})" title="查看模型自我檢討"><div class="muted">🏆 模型勝率</div><div class="num purple" id="winrate">—</div></div></div>
 
 <section class="card"><div class="st">👑 今日最可能起漲 TOP 10</div><div class="top10" id="top10"></div><div class="updated" id="model"></div></section><section class="card"><div class="st">🧬 新增量化因子</div><div class="factorbar" id="factorBar"></div><div class="hint">5/20/60 日動能＋52週高點距離＋20日波動度＋20日平均成交金額流動性過濾＋全市場截面相對強弱。52週歷史不足時，先以現有近120日資料代理；資料會隨每日更新逐步延長。</div></section>
@@ -36,7 +36,7 @@
 <button class="btn" onclick="resetView()">↺ 清除篩選</button>
 </div></section>
 
-<section class="card"><div class="st">📡 321 籌碼＋量化因子總表</div><div class="table-scroll"><table class="table"><thead><tr><th>排名</th><th>股票</th><th>爆發</th><th>現價</th><th>漲跌</th><th>主力</th><th>外資</th><th>投信</th><th>融資</th><th>融券</th><th>借券</th><th>過熱</th><th>AI 5日</th><th>5日動能</th><th>20日動能</th><th>60日動能</th><th>52W距離</th><th>相對強弱</th><th>20日波動</th><th>流動性</th><th>因子分</th><th>殖利率</th><th>營收YoY</th><th>策略</th></tr></thead><tbody id="rows"></tbody></table></div><div class="updated" id="updated"></div></section>
+<section class="card"><div class="st">📡 321 籌碼＋量化因子總表</div><div class="table-scroll"><table class="table"><thead><tr><th>排名</th><th>股票</th><th>爆發</th><th>現價</th><th>漲跌</th><th>主力</th><th>外資</th><th>投信</th><th>融資</th><th>融券</th><th>借券</th><th>過熱</th><th>AI 5日分數</th><th>5日動能</th><th>20日動能</th><th>60日動能</th><th>52W距離</th><th>相對強弱</th><th>20日波動</th><th>流動性</th><th>因子分</th><th>殖利率</th><th>營收YoY</th><th>策略</th></tr></thead><tbody id="rows"></tbody></table></div><div class="updated" id="updated"></div></section>
 
 <section class="card"><div class="st">🧪 因子 T+3 實戰驗證</div><div class="rows" id="factorValidation"><div class="row"><span>等待樣本累積</span><b>—</b></div></div><div class="hint">只統計已完成 T+3 的推薦快照；單一因子未滿20筆不解讀為穩定勝率。</div></section>
 <div class="three">
@@ -93,7 +93,7 @@ function showDetail(code){
  '<div class="row"><span>股票</span><b>'+x.code+' '+(x.name||'')+'</b></div>'+
  '<div class="row"><span>綜合分數</span><b class="yellow">'+n(x.score)+'</b></div>'+
  '<div class="row"><span>現價 / 漲跌</span><b>'+n(x.close)+' / '+(x.change==null?'—':Number(x.change).toFixed(2)+'%')+'</b></div>'+
- '<div class="row"><span>AI偏多模型分數</span><b class="blue">'+n(x.ai_probability_5d)+'%</b></div>'+
+ '<div class="row"><span>AI偏多分數（非校準機率）</span><b class="blue">'+n(x.ai_probability_5d)+'%</b></div>'+
  '<div class="row"><span>主力 / 三大法人</span><b>'+n(x.main_force_score)+' / '+n(x.inst_net)+'</b></div>'+
  '<div class="row"><span>RSI / 量比</span><b>'+n(x.rsi)+' / '+n(x.volume_ratio)+'</b></div>'+
  '<div class="row"><span>MA5 / MA20</span><b>'+n(x.ma5)+' / '+n(x.ma20)+'</b></div>'+
