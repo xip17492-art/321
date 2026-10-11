@@ -615,6 +615,12 @@ def main():
     rec_path = Path("data/recommendation_history.json")
     try: recdb_pre = json.loads(rec_path.read_text(encoding="utf-8"))
     except Exception: recdb_pre = {"days":[]}
+    # Deduplicate before both adaptive weighting and validation so old repeated runs do not bias either.
+    unique_pre = {}
+    for day_pre in recdb_pre.get("days", []):
+        if day_pre.get("date"):
+            unique_pre[day_pre["date"]] = day_pre
+    recdb_pre["days"] = [unique_pre[k] for k in sorted(unique_pre)][-120:]
     settled_pre=[p for d0 in recdb_pre.get("days",[]) for p in d0.get("top10",[]) if p.get("status") in ("win","loss")]
     factors={k:[0,0] for k in ("ai","breakout","chips","inst","low_heat")}
     for p in settled_pre:
