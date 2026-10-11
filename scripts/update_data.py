@@ -278,6 +278,7 @@ def main_force_score(x):
     return clamp(s)
 
 def ai_probability(x):
+    """Heuristic bullishness score (0-100), not a calibrated probability."""
     s = 0.0
     s += (x.get("score", 50) - 50) * 0.75
     s += (x.get("main_force_score", 50) - 50) * 0.35
@@ -505,8 +506,18 @@ def main():
             "dividend_yield": v.get("dividend_yield"), "pe": v.get("pe"), "pb": v.get("pb"),
             "revenue_yoy": rev.get("revenue_yoy"), "revenue": rev.get("revenue")
         }
+        # If a public endpoint is temporarily empty (weekend/holiday/API outage), retain the
+        # last known value instead of replacing it with null. Expose carried fields for transparency.
+        carried = []
+        for field in ("inst_net", "foreign_net", "trust_net", "dealer_net", "margin_balance", "short_balance", "margin_buy", "short_sell", "lending_balance", "lending_sell", "dividend_yield", "pe", "pb", "revenue_yoy", "revenue"):
+            if row.get(field) is None and prev.get(field) is not None:
+                row[field] = prev[field]
+                carried.append(field)
+        row["carried_forward_fields"] = carried
+        row["data_quality_note"] = "部分籌碼/基本面欄位沿用前次有效值" if carried else "欄位依本次資料源回傳；仍請確認來源日期"
         row["main_force_score"] = main_force_score(row)
         row["ai_probability_5d"] = ai_probability(row)
+        row["ai_estimate_type"] = "heuristic_bullishness_score_not_calibrated_probability"
         row["ai_signal"] = "偏多" if row["ai_probability_5d"] >= 68 else ("中性" if row["ai_probability_5d"] >= 50 else "偏空")
         row["savings_score"] = clamp(
             35 + (row["dividend_yield"] or 0) * 5 +
@@ -627,6 +638,14 @@ def main():
     rec_path = Path("data/recommendation_history.json")
     try: recdb = json.loads(rec_path.read_text(encoding="utf-8"))
     except Exception: recdb = {"days": [], "model": {}}
+    # Repair historical duplicate dates created by repeated manual/scheduled runs.
+    # Keep the latest snapshot for each date; settlement below will recalculate open picks.
+    dedup_days = {}
+    for old_day in recdb.get("days", []):
+        dkey = old_day.get("date")
+        if dkey:
+            dedup_days[dkey] = old_day
+    recdb["days"] = [dedup_days[k] for k in sorted(dedup_days)][-120:]
     current = {x["code"]: x for x in result}
     for day in recdb.get("days", []):
         for pick in day.get("top10", []):
@@ -654,8 +673,13 @@ def main():
             "liquidity_ok":x.get("liquidity_ok"),"research_factor_score":x.get("research_factor_score"),
             "market_regime":x.get("market_regime"),"reason":x.get("strategy"),"status":"open"
         })
-    recdb.setdefault("days",[]).append({"index":len(recdb.get("days",[]))+1,"date":today,"top10":today_top})
-    recdb["days"]=recdb["days"][-120:]
+    # One record per calendar date: rerunning the workflow replaces today's snapshot,
+    # rather than inflating the recommendation sample size and win-rate statistics.
+    recdb["days"] = [d for d in recdb.get("days", []) if d.get("date") != today]
+    recdb.setdefault("days", []).append({"index": 0, "date": today, "top10": today_top})
+    recdb["days"] = recdb["days"][-120:]
+    for idx, day in enumerate(recdb["days"], 1):
+        day["index"] = idx
     settled=[p for d0 in recdb["days"] for p in d0.get("top10",[]) if p.get("status") in ("win","loss")]
     wins=sum(p.get("status")=="win" for p in settled); total=len(settled)
     factor_defs = {
@@ -682,9 +706,9 @@ def main():
         "updated_at": datetime.now().astimezone().isoformat(timespec="minutes"),
         "data_notes": {
             "main_force": "主力籌碼為量價＋法人推估，不等同逐家券商分點。",
-            "ai": "AI預測為本機多因子統計模型，非保證獲利，也不是大型語言模型。",
+            "ai": "AI欄位目前是手工設計多因子公式轉換的偏多分數（0-100），不是經歷史回測校準的真實上漲機率；不保證獲利。",
             "realtime": "GitHub Pages 的日資料為盤後資料；盤中即時報價需由瀏覽器直接連接 TWSE MIS 或正式即時行情服務。",
-            "recommendation_engine": "Top 10 以歷史推薦結果做樣本外 T+3 績效追蹤；因子快照同步保存，factor_validation 只使用已結算樣本。",
+            "recommendation_engine": "每日只保留一份推薦快照；重跑同日會更新當日紀錄而不增加樣本數。Top 10 以 T+3 期間內是否達 +2% 追蹤；因子驗證只使用已結算樣本。",
             "factor_engine": "3.3 新增產業鏈漲幅、下降趨勢線突破＋站上月線判定，並修正每日漲跌幅換算；保留 5/20/60 日動能、52週高點距離（資料不足時以近120日代理）、20日年化波動度、20日平均成交金額流動性過濾、全市場截面中位數相對強弱。流動性過濾影響推薦池，不刪除總表。"
         },
         "stocks": result
