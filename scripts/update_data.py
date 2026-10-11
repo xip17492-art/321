@@ -286,6 +286,62 @@ def ai_probability(x):
     s -= max(0, (x.get("overheat_score") or 0) - 70) * 0.55
     return round(1 / (1 + math.exp(-s / 18)) * 100, 1)
 
+def twse_bulk_history(calendar_days=100):
+    """Backfill recent daily OHLCV for all listed stocks from TWSE's date-aware historical endpoint.
+    This is only used when the saved history is too short; later runs remain incremental.
+    """
+    from datetime import date, timedelta
+    from time import sleep
+
+    end = date.today()
+    start = end - timedelta(days=calendar_days)
+    collected = {}
+    current = start
+    while current <= end:
+        if current.weekday() < 5:
+            ds = current.strftime("%Y%m%d")
+            url = f"https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX?date={ds}&type=ALLBUT0999&response=json"
+            try:
+                payload = get_json(url)
+                fields = None
+                rows = None
+                # TWSE's response table keys can vary; identify the table by its field names.
+                for key, value in payload.items():
+                    if not (isinstance(value, list) and value and isinstance(value[0], list)):
+                        continue
+                    fkey = key.replace("data", "fields")
+                    candidate_fields = payload.get(fkey)
+                    if not isinstance(candidate_fields, list):
+                        continue
+                    fs = [str(x).replace(" ", "") for x in candidate_fields]
+                    if any("證券代號" in x for x in fs) and any("收盤價" in x for x in fs):
+                        fields, rows = candidate_fields, value
+                        break
+                if fields and rows:
+                    code_i = pick_index(fields, "證券代號")
+                    close_i = pick_index(fields, "收盤價")
+                    volume_i = pick_index(fields, "成交股數")
+                    if code_i is not None and close_i is not None:
+                        for row in rows:
+                            if max(code_i, close_i) >= len(row):
+                                continue
+                            code = str(row[code_i]).strip()
+                            close = num(row[close_i])
+                            if not (code.isdigit() and len(code) == 4 and close is not None):
+                                continue
+                            volume = num(row[volume_i]) if volume_i is not None and volume_i < len(row) else 0
+                            collected.setdefault(code, []).append((current.isoformat(), close, volume or 0))
+            except Exception as e:
+                print(f"TWSE history skipped {ds}: {e}")
+            sleep(0.12)
+        current += timedelta(days=1)
+    for code, bars in collected.items():
+        bars.sort(key=lambda z: z[0])
+        collected[code] = bars[-90:]
+    print(f"TWSE historical backfill: {len(collected)} symbols")
+    return collected
+
+
 def main():
     today = datetime.now().strftime("%Y-%m-%d")
     old = {}
@@ -299,6 +355,13 @@ def main():
     if not quotes:
         raise RuntimeError("No market data returned")
 
+    # Backfill when most saved records have not yet accumulated enough sessions for 20/60-day factors.
+    history_lengths = [len(x.get("history_close", [])) for x in old.get("stocks", []) if x.get("history_close")]
+    if len(history_lengths) < max(100, int(len(quotes) * 0.25)) or (history_lengths and median(history_lengths) < 61):
+        bulk_history = twse_bulk_history(calendar_days=100)
+    else:
+        bulk_history = {}
+
     inst, margin, lending, valuation, revenue = twse_t86(), twse_margin(), twse_lending(), twse_valuation(), twse_revenue()
     result = []
 
@@ -306,6 +369,12 @@ def main():
         prev = oldmap.get(x["code"], {})
         closes = list(prev.get("history_close", []))[-251:]
         vols = list(prev.get("history_volume", []))[-251:]
+        # Historical bulk data is date-sorted and replaces shorter locally accumulated history.
+        # Keep the most recent 90 sessions; 60D momentum and the 20D volatility/liquidity factors can then calculate.
+        hist_bars = bulk_history.get(x["code"], [])
+        if len(hist_bars) > len(closes):
+            closes = [b[1] for b in hist_bars][-251:]
+            vols = [b[2] for b in hist_bars][-251:]
         # TWSE Change 是價差金額，統一換算成漲跌幅，避免以金額誤判百分比門檻。
         raw_change = x.get("change")
         # 優先使用交易所當日價差推算前收，避免同日重跑時拿已更新的收盤價當前收。
