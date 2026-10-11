@@ -1,0 +1,74 @@
+name: Radar validation
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'scripts/**'
+      - 'data/**'
+      - '.github/workflows/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Compile Python
+        run: python -m py_compile scripts/update_data.py scripts/analyst_tracker.py
+      - name: Validate radar data structure
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d = json.loads(Path("data/data.json").read_text(encoding="utf-8"))
+          stocks = d.get("stocks", []) if isinstance(d, dict) else d
+          assert isinstance(stocks, list) and stocks, "No stock records found"
+          required = {"code", "name", "score"}
+          missing = required - set(stocks[0])
+          assert not missing, f"Missing required stock fields: {sorted(missing)}"
+          print(f"Data structure OK: {len(stocks)} stock records")
+          PY
+      - name: Validate inline JavaScript syntax
+        run: |
+          python - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+          class Scripts(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.current = None
+                  self.scripts = []
+              def handle_starttag(self, tag, attrs):
+                  if tag.lower() == "script":
+                      attrs = dict(attrs)
+                      self.current = [] if not attrs.get("src") else None
+              def handle_data(self, data):
+                  if self.current is not None:
+                      self.current.append(data)
+              def handle_endtag(self, tag):
+                  if tag.lower() == "script":
+                      if self.current is not None:
+                          self.scripts.append("".join(self.current))
+                      self.current = None
+          parser = Scripts()
+          parser.feed(Path("index.html").read_text(encoding="utf-8"))
+          scripts = [s for s in parser.scripts if s.strip()]
+          assert scripts, "No inline scripts found"
+          for i, script in enumerate(scripts, 1):
+              Path(f"/tmp/radar-inline-{i}.js").write_text(script, encoding="utf-8")
+          print(f"Checking {len(scripts)} inline script(s)")
+          PY
+          for f in /tmp/radar-inline-*.js; do node --check "$f"; done
