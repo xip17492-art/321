@@ -1457,6 +1457,34 @@
       "published": "Thu, 09 Apr 2026 07:00:00 GMT",
       "analyst": null,
       "codes": []
+    },
+    {
+      "title": "台股創新高還可以買什麼？ 分析師：這兩族群不買會後悔 - 經濟日報",
+      "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE9nM3BSbnVJYUFJQy1VLXUwcXJzM3dxT1dYNDl5VHZaUzNyUDU0cEJuYmVlV1pQcnFyd1h0bXdLM2RyUFNrNWZUMmt0QzlUOEtTLUhhZ3VHX2FHZ9IBX0FVX3lxTE5qeWFiQ2dCQ1hnaXItZ3Z2UHAtcVF2QXZXb0tNLWRrMW9CZTctSVczRXBKd2dsZFZtcDRKM1RJVmlDRnV5Tkg2MjA3RXVMamFYSWdwbzlEVFY4bFBGMkpv?oc=5",
+      "published": "Tue, 22 Sep 2026 07:00:00 GMT",
+      "analyst": null,
+      "codes": []
+    },
+    {
+      "title": "三月就是抄底進場點、跟著我！有賣才有買 - 鉅亨網",
+      "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTFBlRWNabExsSnNWd0x1Rk9OQnBHdkFRbmREc0U1QTFIbEViNTVBZkxpZWJkckZZR1JHWktVVzhWQ005c0h4NERsdi1OWlVEOTg?oc=5",
+      "published": "Mon, 09 Mar 2026 07:00:00 GMT",
+      "analyst": null,
+      "codes": []
+    },
+    {
+      "title": "記憶體新一輪超級循環來了！分析師點名「4檔」最大受惠股 - 鉅亨網",
+      "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTFA3T3pOVC1MTkpzcjdsVk9tX1pfX0pfdXVnVzhuZnhxNUstVXcyUE5qOU9HMG50Z01CZ21hdlpIX3BVMmZ4c2Y2VXZlWVo4RkE?oc=5",
+      "published": "Tue, 03 Feb 2026 08:00:00 GMT",
+      "analyst": null,
+      "codes": []
+    },
+    {
+      "title": "台股盤中暴跌近1900點！分析師曝像百貨公司週年慶：跌破「這價位」砸1億買0050 - 風傳媒",
+      "url": "https://news.google.com/rss/articles/CBMiUEFVX3lxTE1wdUNlSzJxT0czRXpBWElQYUw4UkVMMW1HREhHcXI5U2pNcGFmbGh2TWJhZlE3cENnOENvek5KX29yYXhvZkJpZy1SN0ZHazNj?oc=5",
+      "published": "Wed, 29 Jul 2026 07:00:00 GMT",
+      "analyst": null,
+      "codes": []
     }
   ],
   "analysts": {
@@ -1472,6 +1500,6 @@
       "confidence": "樣本不足"
     }
   },
-  "last_scan": "2026-10-11T13:49+00:00",
+  "last_scan": "2026-10-12T00:46+00:00",
   "method": "只有具備可辨識分析師與股票代號的公開文章才進入追蹤；未完成 T+1/T+3/T+5 前不計勝率。"
 }
