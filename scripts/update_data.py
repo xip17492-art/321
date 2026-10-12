@@ -538,7 +538,10 @@ def main():
         x["relative_strength_20d"] = (x.get("momentum_20d") - market_mom20) if x.get("momentum_20d") is not None and market_mom20 is not None else None
         x["relative_strength_60d"] = (x.get("momentum_60d") - market_mom60) if x.get("momentum_60d") is not None and market_mom60 is not None else None
         x["liquidity_floor_20d"] = liquidity_floor
-        x["liquidity_ok"] = bool(x.get("avg_turnover_20d") is not None and liquidity_floor is not None and x["avg_turnover_20d"] >= liquidity_floor)
+        # Require at least NT$30 million average daily turnover over 20 sessions by default.
+        # This keeps thinly traded stocks out of the actionable radar ranking.
+        x["liquidity_min_turnover"] = 30000000
+        x["liquidity_ok"] = bool(x.get("avg_turnover_20d") is not None and x["avg_turnover_20d"] >= 30000000)
         x["market_regime"] = "偏多" if market_mom20 is not None and market_mom20 >= 2 else ("偏空" if market_mom20 is not None and market_mom20 <= -2 else "中性")
 
     # 產業鏈標籤：只對常見台股代號/名稱做保守分類，未知者不猜測。
