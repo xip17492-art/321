@@ -1583,6 +1583,20 @@
       "published": "Tue, 16 Jun 2026 07:00:00 GMT",
       "analyst": null,
       "codes": []
+    },
+    {
+      "title": "台股失守4.9萬點！分析師卻依舊看好：台灣出口、股市表現非常亮眼 | 林子靖 | 新聞 - 風傳媒",
+      "url": "https://news.google.com/rss/articles/CBMiTkFVX3lxTFB6a3JablJWcnJxYjhpMlkwQUJaSGpOVHN0VHg5QVM5SVQwSzZ2SFhHbFVUMFNFRWh6bFpzOTBhaU9lc0NOMlhnZ2lPcXAydw?oc=5",
+      "published": "Tue, 13 Oct 2026 13:42:00 GMT",
+      "analyst": null,
+      "codes": []
+    },
+    {
+      "title": "華爾街看好再漲50%！ 傳奇投資人反「大砍台積電」？ 外媒揭關鍵 - 東森電視",
+      "url": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE5tMThFcnFiZnR1R3dnTEtWV3BPNWRPemJvVmQzWG5kNldUaHZKMmZ1V2FnR3hOZU1lUURFSTV6WGRfOUNpWEhNaW01dXY2cnFBR0x5MERR?oc=5",
+      "published": "Thu, 30 Jul 2026 07:00:00 GMT",
+      "analyst": null,
+      "codes": []
     }
   ],
   "analysts": {
@@ -1598,6 +1612,6 @@
       "confidence": "樣本不足"
     }
   },
-  "last_scan": "2026-10-13T10:27+00:00",
+  "last_scan": "2026-10-13T15:17+00:00",
   "method": "只有具備可辨識分析師與股票代號的公開文章才進入追蹤；未完成 T+1/T+3/T+5 前不計勝率。"
 }
