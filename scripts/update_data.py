@@ -295,7 +295,8 @@ def twse_bulk_history(calendar_days=100):
     from datetime import date, timedelta
     from time import sleep
 
-    end = date.today()
+    # Use Taiwan's calendar date, not the GitHub runner's UTC date.
+    end = datetime.now(ZoneInfo("Asia/Taipei")).date()
     start = end - timedelta(days=calendar_days)
     collected = {}
     current = start
@@ -383,6 +384,22 @@ def main():
     # Refresh recent TWSE history on every run so same-close days and turnover values stay date-aligned.
     # 110 calendar days generally covers enough sessions for 60-day momentum plus the 20-day liquidity measure.
     bulk_history = twse_bulk_history(calendar_days=110)
+    # The quote endpoint does not include an authoritative trade date. Derive the market date
+    # from dated TWSE history so a holiday, delayed endpoint, or partial outage cannot label
+    # an old close as today's data. If the history endpoint is unavailable, preserve the last
+    # known history date rather than inventing a fresh one.
+    observed_dates = [bars[-1][0] for bars in bulk_history.values() if bars]
+    if observed_dates:
+        today = max(observed_dates)
+        print(f"Authoritative market date from TWSE historical bars: {today}")
+    else:
+        prior_dates = [d for stock in oldmap.values() for d in stock.get("history_date", []) if isinstance(d, str) and len(d) == 10]
+        if prior_dates:
+            today = max(prior_dates)
+            print(f"WARNING: TWSE historical backfill unavailable; preserving last known market date {today}")
+        else:
+            today = now_tw.strftime("%Y-%m-%d")
+            print("WARNING: no historical market date available; data date is provisional")
 
     inst, margin, lending, valuation, revenue = twse_t86(), twse_margin(), twse_lending(), twse_valuation(), twse_revenue()
     result = []
@@ -406,16 +423,12 @@ def main():
         if today_turnover is None and x.get("volume") is not None:
             today_turnover = x["close"] * x["volume"]
         if fresh_twse_history:
-            # Upsert TWSE's current quote by date, even if the close is unchanged.
+            # Only replace the close when TWSE history confirms a bar for the selected market date.
+            # Never append an undated quote as a fabricated trading session.
             if history_dates and history_dates[-1] == today:
                 closes[-1] = x["close"]
                 vols[-1] = x.get("volume") or 0
                 turnover_history[-1] = today_turnover
-            else:
-                closes.append(x["close"])
-                vols.append(x.get("volume") or 0)
-                history_dates.append(today)
-                turnover_history.append(today_turnover)
         else:
             # Legacy/TPEx history may not have aligned dates yet; preserve it without overwriting a prior close.
             if history_dates and history_dates[-1] == today:
@@ -754,6 +767,7 @@ def main():
         "version": "3.3",
         "industry_chains": industry_chains,
         "date": today,
+        "market_date_source": "TWSE dated historical bars" if observed_dates else "last known history (fallback; verify freshness)",
         "updated_at": now_tw.isoformat(timespec="minutes"),
         "data_notes": {
             "main_force": "主力籌碼為量價＋法人推估，不等同逐家券商分點。",
