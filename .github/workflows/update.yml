@@ -80,7 +80,11 @@ jobs:
           assert d.get("date"), "market date missing"
           assert d.get("updated_at"), "generation timestamp missing"
           assert d.get("market_date_source") == "TWSE dated historical bars", f"Market date is not verified by TWSE history: {d.get('market_date_source')}"
+          twse_history_lengths = [len(s.get("history_close", [])) for s in stocks if s.get("market") == "TWSE"]
+          max_history = max(twse_history_lengths, default=0)
+          assert max_history >= 200, f"52-week history not sufficiently backfilled: longest TWSE history has only {max_history} bars"
           print(f"MARKET DATE VERIFIED: {d['date']} | generated {d['updated_at']} | source {d['market_date_source']}")
+          print(f"HISTORY VERIFIED: longest TWSE history has {max_history} daily bars")
           print(f"VALIDATION OK: {len(stocks)} stocks; factor fields {present}/{len(factor_fields)}; technical fields {len(technical_fields)}/{len(technical_fields)}; industry chains {len(chains)}")
           PY
 
