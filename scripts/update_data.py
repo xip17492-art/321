@@ -1,6 +1,7 @@
 import json
 import math
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from pathlib import Path
 from urllib.request import Request, urlopen
 import subprocess
@@ -116,7 +117,7 @@ def twse_quotes():
             "code": c, "name": str(r.get("Name", "")).strip(), "market": "TWSE",
             "open": num(r.get("OpeningPrice")), "high": num(r.get("HighestPrice")),
             "low": num(r.get("LowestPrice")), "close": close,
-            "volume": num(r.get("TradeVolume")), "change": num(r.get("Change"))
+            "volume": num(r.get("TradeVolume")), "turnover": num(r.get("TradeValue")), "change": num(r.get("Change"))
         })
     return out
 
@@ -136,12 +137,12 @@ def tpex_quotes():
             "code": c, "name": str(r.get("CompanyName", "")).strip(), "market": "TPEX",
             "open": num(r.get("Open")), "high": num(r.get("High")),
             "low": num(r.get("Low")), "close": close,
-            "volume": num(r.get("TradingShares")), "change": None
+            "volume": num(r.get("TradingShares")), "turnover": num(r.get("TradingAmount")), "change": None
         })
     return out
 
 def twse_t86():
-    d = datetime.now().strftime("%Y%m%d")
+    d = datetime.now(ZoneInfo("Asia/Taipei")).strftime("%Y%m%d")
     try:
         j = get_json(f"https://www.twse.com.tw/rwd/zh/fund/T86?date={d}&selectType=ALL&response=json")
         fields, rows = j.get("fields", []), j.get("data", [])
@@ -339,6 +340,7 @@ def twse_bulk_history(calendar_days=100):
                     code_i = pick_index(fields, "證券代號")
                     close_i = pick_index(fields, "收盤價")
                     volume_i = pick_index(fields, "成交股數")
+                    turnover_i = pick_index(fields, "成交金額")
                     if code_i is not None and close_i is not None:
                         for row in rows:
                             if max(code_i, close_i) >= len(row):
@@ -348,7 +350,11 @@ def twse_bulk_history(calendar_days=100):
                             if not (code.isdigit() and len(code) == 4 and close is not None):
                                 continue
                             volume = num(row[volume_i]) if volume_i is not None and volume_i < len(row) else 0
-                            collected.setdefault(code, []).append((current.isoformat(), close, volume or 0))
+                            turnover = num(row[turnover_i]) if turnover_i is not None and turnover_i < len(row) else None
+                            # Prefer the exchange-reported traded value; only estimate from close × shares if absent.
+                            if turnover is None and volume is not None:
+                                turnover = close * volume
+                            collected.setdefault(code, []).append((current.isoformat(), close, volume or 0, turnover))
             except Exception as e:
                 print(f"TWSE history skipped {ds}: {e}")
             sleep(0.12)
@@ -361,7 +367,8 @@ def twse_bulk_history(calendar_days=100):
 
 
 def main():
-    today = datetime.now().strftime("%Y-%m-%d")
+    now_tw = datetime.now(ZoneInfo("Asia/Taipei"))
+    today = now_tw.strftime("%Y-%m-%d")
     old = {}
     if OUT.exists():
         try:
@@ -373,12 +380,9 @@ def main():
     if not quotes:
         raise RuntimeError("No market data returned")
 
-    # Backfill when most saved records have not yet accumulated enough sessions for 20/60-day factors.
-    history_lengths = [len(x.get("history_close", [])) for x in old.get("stocks", []) if x.get("history_close")]
-    if len(history_lengths) < max(100, int(len(quotes) * 0.25)) or (history_lengths and median(history_lengths) < 90):
-        bulk_history = twse_bulk_history(calendar_days=100)
-    else:
-        bulk_history = {}
+    # Refresh recent TWSE history on every run so same-close days and turnover values stay date-aligned.
+    # 110 calendar days generally covers enough sessions for 60-day momentum plus the 20-day liquidity measure.
+    bulk_history = twse_bulk_history(calendar_days=110)
 
     inst, margin, lending, valuation, revenue = twse_t86(), twse_margin(), twse_lending(), twse_valuation(), twse_revenue()
     result = []
@@ -387,12 +391,47 @@ def main():
         prev = oldmap.get(x["code"], {})
         closes = list(prev.get("history_close", []))[-251:]
         vols = list(prev.get("history_volume", []))[-251:]
-        # Historical bulk data is date-sorted and replaces shorter locally accumulated history.
-        # Keep the most recent 90 sessions; 60D momentum and the 20D volatility/liquidity factors can then calculate.
-        hist_bars = bulk_history.get(x["code"], [])
-        if len(hist_bars) > len(closes):
+        history_dates = list(prev.get("history_date", []))[-251:]
+        turnover_history = list(prev.get("history_turnover", []))[-251:]
+        # TWSE fresh history is date-indexed and includes exchange-reported traded value.
+        # Replace old potentially misaligned close/volume arrays with the same dated bars.
+        hist_bars = bulk_history.get(x["code"], []) if x.get("market") == "TWSE" else []
+        fresh_twse_history = len(hist_bars) >= 20
+        if fresh_twse_history:
             closes = [b[1] for b in hist_bars][-251:]
             vols = [b[2] for b in hist_bars][-251:]
+            history_dates = [b[0] for b in hist_bars][-251:]
+            turnover_history = [b[3] for b in hist_bars][-251:]
+        today_turnover = x.get("turnover")
+        if today_turnover is None and x.get("volume") is not None:
+            today_turnover = x["close"] * x["volume"]
+        if fresh_twse_history:
+            # Upsert TWSE's current quote by date, even if the close is unchanged.
+            if history_dates and history_dates[-1] == today:
+                closes[-1] = x["close"]
+                vols[-1] = x.get("volume") or 0
+                turnover_history[-1] = today_turnover
+            else:
+                closes.append(x["close"])
+                vols.append(x.get("volume") or 0)
+                history_dates.append(today)
+                turnover_history.append(today_turnover)
+        else:
+            # Legacy/TPEx history may not have aligned dates yet; preserve it without overwriting a prior close.
+            if history_dates and history_dates[-1] == today:
+                if closes: closes[-1] = x["close"]
+                if vols: vols[-1] = x.get("volume") or 0
+                if turnover_history: turnover_history[-1] = today_turnover
+            else:
+                if not closes or closes[-1] != x["close"]:
+                    closes.append(x["close"])
+                    vols.append(x.get("volume") or 0)
+                elif vols:
+                    vols[-1] = x.get("volume") or 0
+                history_dates.append(today)
+                turnover_history.append(today_turnover)
+        closes, vols = closes[-251:], vols[-251:]
+        history_dates, turnover_history = history_dates[-251:], turnover_history[-251:]
         # TWSE Change 是價差金額，統一換算成漲跌幅，避免以金額誤判百分比門檻。
         raw_change = x.get("change")
         # 優先使用交易所當日價差推算前收，避免同日重跑時拿已更新的收盤價當前收。
@@ -406,10 +445,7 @@ def main():
             x["change"] = round((x["close"] / prior_close - 1) * 100, 2)
         else:
             x["change"] = None
-        if not closes or closes[-1] != x["close"]:
-            closes.append(x["close"])
-        if not vols or vols[-1] != (x.get("volume") or 0):
-            vols.append(x.get("volume") or 0)
+        # Arrays above are already upserted by trading date; unchanged closes still retain their daily volume.
 
         ma5, ma20 = sma(closes, 5), sma(closes, 20)
         rr = rsi(closes, 14)
@@ -422,7 +458,12 @@ def main():
         high_52w_distance = pct(high_52w, x["close"]) if high_52w else None
         high_52w_lookback = min(len(high_window), 252)
         turnover20 = None
-        if len(closes) >= 20 and len(vols) >= 20:
+        valid_turnovers = [v for v in turnover_history[-20:] if v is not None]
+        if len(valid_turnovers) >= 18:
+            # Use exchange-reported traded value where available; require at least 18 valid sessions.
+            turnover20 = sum(valid_turnovers) / len(valid_turnovers)
+        elif len(closes) >= 20 and len(vols) >= 20:
+            # Explicit fallback estimate for markets/endpoints without traded-value history.
             pairs = [(c or 0) * (v or 0) for c, v in zip(closes[-20:], vols[-20:])]
             turnover20 = sum(pairs) / len(pairs)
         pv = sma(vols[:-1], 5) if len(vols) >= 6 else None
@@ -492,12 +533,13 @@ def main():
             "risk": "high" if overheat >= 75 else ("low" if score >= 75 and overheat < 50 else "medium"),
             "strategy": "突破回測" if breakout and overheat < 70 else ("避免追高" if overheat >= 75 else ("量增觀察" if score >= 70 else "觀察")),
             "history_close": closes[-252:], "history_volume": vols[-252:],
+            "history_date": history_dates[-252:], "history_turnover": turnover_history[-252:],
             "momentum_5d": mom5, "momentum_20d": mom20, "momentum_60d": mom60,
             "volatility_20d": vol20, "high_52w": high_52w,
             "high_52w_distance": high_52w_distance,
             "high_52w_lookback": high_52w_lookback,
             "avg_turnover_20d": turnover20,
-            "history_date": (list(prev.get("history_date", [])) + [today])[-120:],
+            "turnover_source": "exchange_reported" if len(valid_turnovers) >= 18 else "estimated_close_times_volume",
             "inst_net": i.get("inst_net"), "foreign_net": i.get("foreign_net"),
             "trust_net": i.get("trust_net"), "dealer_net": i.get("dealer_net"),
             "margin_balance": m.get("margin_balance"), "short_balance": m.get("short_balance"),
@@ -712,7 +754,7 @@ def main():
         "version": "3.3",
         "industry_chains": industry_chains,
         "date": today,
-        "updated_at": datetime.now().astimezone().isoformat(timespec="minutes"),
+        "updated_at": now_tw.isoformat(timespec="minutes"),
         "data_notes": {
             "main_force": "主力籌碼為量價＋法人推估，不等同逐家券商分點。",
             "ai": "AI欄位目前是手工設計多因子公式轉換的偏多分數（0-100），不是經歷史回測校準的真實上漲機率；不保證獲利。",
