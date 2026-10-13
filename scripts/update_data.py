@@ -288,7 +288,7 @@ def ai_probability(x):
     s -= max(0, (x.get("overheat_score") or 0) - 70) * 0.55
     return round(1 / (1 + math.exp(-s / 18)) * 100, 1)
 
-def twse_bulk_history(calendar_days=100):
+def twse_bulk_history(calendar_days=380):
     """Backfill recent daily OHLCV for all listed stocks from TWSE's date-aware historical endpoint.
     This is only used when the saved history is too short; later runs remain incremental.
     """
@@ -362,7 +362,7 @@ def twse_bulk_history(calendar_days=100):
         current += timedelta(days=1)
     for code, bars in collected.items():
         bars.sort(key=lambda z: z[0])
-        collected[code] = bars[-90:]
+        collected[code] = bars[-252:]
     print(f"TWSE historical backfill: {len(collected)} symbols")
     return collected
 
@@ -383,7 +383,7 @@ def main():
 
     # Refresh recent TWSE history on every run so same-close days and turnover values stay date-aligned.
     # 110 calendar days generally covers enough sessions for 60-day momentum plus the 20-day liquidity measure.
-    bulk_history = twse_bulk_history(calendar_days=110)
+    bulk_history = twse_bulk_history(calendar_days=380)
     # The quote endpoint does not include an authoritative trade date. Derive the market date
     # from dated TWSE history so a holiday, delayed endpoint, or partial outage cannot label
     # an old close as today's data. If the history endpoint is unavailable, preserve the last
@@ -466,7 +466,7 @@ def main():
         mom20 = returns(closes, 20)
         mom60 = returns(closes, 60)
         vol20 = stdev_pct(closes, 20)
-        high_window = closes[-252:] if len(closes) >= 252 else closes[-120:]
+        high_window = closes[-252:]
         high_52w = max(high_window) if high_window else None
         high_52w_distance = pct(high_52w, x["close"]) if high_52w else None
         high_52w_lookback = min(len(high_window), 252)
