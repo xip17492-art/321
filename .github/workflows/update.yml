@@ -77,6 +77,10 @@ jobs:
           assert isinstance(chains, list) and chains, "industry_chains missing or empty"
           for chain in chains:
               assert "industry_chain" in chain and "avg_change_pct" in chain, "invalid industry chain record"
+          assert d.get("date"), "market date missing"
+          assert d.get("updated_at"), "generation timestamp missing"
+          assert d.get("market_date_source") == "TWSE dated historical bars", f"Market date is not verified by TWSE history: {d.get('market_date_source')}"
+          print(f"MARKET DATE VERIFIED: {d['date']} | generated {d['updated_at']} | source {d['market_date_source']}")
           print(f"VALIDATION OK: {len(stocks)} stocks; factor fields {present}/{len(factor_fields)}; technical fields {len(technical_fields)}/{len(technical_fields)}; industry chains {len(chains)}")
           PY
 
