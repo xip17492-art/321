@@ -1,6 +1,7 @@
 import json
 import math
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from pathlib import Path
 from urllib.request import Request, urlopen
 import subprocess
@@ -141,7 +142,7 @@ def tpex_quotes():
     return out
 
 def twse_t86():
-    d = datetime.now().strftime("%Y%m%d")
+    d = datetime.now(ZoneInfo("Asia/Taipei")).strftime("%Y%m%d")
     try:
         j = get_json(f"https://www.twse.com.tw/rwd/zh/fund/T86?date={d}&selectType=ALL&response=json")
         fields, rows = j.get("fields", []), j.get("data", [])
@@ -366,7 +367,8 @@ def twse_bulk_history(calendar_days=100):
 
 
 def main():
-    today = datetime.now().strftime("%Y-%m-%d")
+    now_tw = datetime.now(ZoneInfo("Asia/Taipei"))
+    today = now_tw.strftime("%Y-%m-%d")
     old = {}
     if OUT.exists():
         try:
@@ -752,7 +754,7 @@ def main():
         "version": "3.3",
         "industry_chains": industry_chains,
         "date": today,
-        "updated_at": datetime.now().astimezone().isoformat(timespec="minutes"),
+        "updated_at": now_tw.isoformat(timespec="minutes"),
         "data_notes": {
             "main_force": "主力籌碼為量價＋法人推估，不等同逐家券商分點。",
             "ai": "AI欄位目前是手工設計多因子公式轉換的偏多分數（0-100），不是經歷史回測校準的真實上漲機率；不保證獲利。",
