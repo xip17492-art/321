@@ -394,24 +394,40 @@ def main():
         # TWSE fresh history is date-indexed and includes exchange-reported traded value.
         # Replace old potentially misaligned close/volume arrays with the same dated bars.
         hist_bars = bulk_history.get(x["code"], []) if x.get("market") == "TWSE" else []
-        if len(hist_bars) >= 20:
+        fresh_twse_history = len(hist_bars) >= 20
+        if fresh_twse_history:
             closes = [b[1] for b in hist_bars][-251:]
             vols = [b[2] for b in hist_bars][-251:]
             history_dates = [b[0] for b in hist_bars][-251:]
             turnover_history = [b[3] for b in hist_bars][-251:]
-        # Upsert today's quote by date, not by whether the closing price changed.
         today_turnover = x.get("turnover")
         if today_turnover is None and x.get("volume") is not None:
             today_turnover = x["close"] * x["volume"]
-        if history_dates and history_dates[-1] == today:
-            closes[-1] = x["close"]
-            if vols: vols[-1] = x.get("volume") or 0
-            if turnover_history: turnover_history[-1] = today_turnover
+        if fresh_twse_history:
+            # Upsert TWSE's current quote by date, even if the close is unchanged.
+            if history_dates and history_dates[-1] == today:
+                closes[-1] = x["close"]
+                vols[-1] = x.get("volume") or 0
+                turnover_history[-1] = today_turnover
+            else:
+                closes.append(x["close"])
+                vols.append(x.get("volume") or 0)
+                history_dates.append(today)
+                turnover_history.append(today_turnover)
         else:
-            closes.append(x["close"])
-            vols.append(x.get("volume") or 0)
-            history_dates.append(today)
-            turnover_history.append(today_turnover)
+            # Legacy/TPEx history may not have aligned dates yet; preserve it without overwriting a prior close.
+            if history_dates and history_dates[-1] == today:
+                if closes: closes[-1] = x["close"]
+                if vols: vols[-1] = x.get("volume") or 0
+                if turnover_history: turnover_history[-1] = today_turnover
+            else:
+                if not closes or closes[-1] != x["close"]:
+                    closes.append(x["close"])
+                    vols.append(x.get("volume") or 0)
+                elif vols:
+                    vols[-1] = x.get("volume") or 0
+                history_dates.append(today)
+                turnover_history.append(today_turnover)
         closes, vols = closes[-251:], vols[-251:]
         history_dates, turnover_history = history_dates[-251:], turnover_history[-251:]
         # TWSE Change 是價差金額，統一換算成漲跌幅，避免以金額誤判百分比門檻。
