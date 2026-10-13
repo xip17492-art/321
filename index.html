@@ -15,7 +15,7 @@
 <div class="card metric-btn" onclick="setFilterById('ai')" title="查看 AI 偏多股票"><div class="muted">🤖 AI偏多分數 ≥68</div><div class="num blue" id="aibull">—</div></div>
 <div class="card metric-btn" onclick="document.getElementById('feedback').scrollIntoView({behavior:'smooth'})" title="查看模型自我檢討"><div class="muted">🏆 模型勝率</div><div class="num purple" id="winrate">—</div></div></div>
 
-<section class="card"><div class="st">👑 最新交易日最可能起漲 TOP 10</div><div class="hint">盤前顯示最近一個已完成交易日的排行；本網站為盤後日資料，非盤中即時排行。請先確認下方「行情日期」。</div><div class="top10" id="top10"></div><div class="updated" id="model"></div></section><section class="card"><div class="st">🧬 新增量化因子</div><div class="factorbar" id="factorBar"></div><div class="hint">5/20/60 日動能＋52週高點距離＋20日波動度＋20日平均成交金額流動性過濾＋全市場截面相對強弱。52週歷史不足時，先以現有近120日資料代理；資料會隨每日更新逐步延長。</div></section>
+<section class="card"><div class="st">👑 最新交易日最可能起漲 TOP 10</div><div class="hint">盤前顯示最近一個已完成交易日的排行；本網站為盤後日資料，非盤中即時排行。請先確認下方「行情日期」。</div><div class="top10" id="top10"></div><div class="updated" id="model"></div></section><section class="card"><div class="st">🧬 新增量化因子</div><div class="factorbar" id="factorBar"></div><div class="hint">5/20/60 日動能＋52週高點距離＋20日波動度＋20日平均成交金額流動性過濾＋全市場截面相對強弱。52週高點優先使用近252個交易日；歷史未滿一年時以實際可用交易日計算，個股詳情會顯示回看日數。</div></section>
 
 <section class="card"><div class="st">🏭 各產業鏈漲幅排行</div><div class="rows" id="industryChains"><div class="row"><span>等待產業資料</span><b>—</b></div></div><div class="hint">依目前掃描股票的產業分類計算平均漲幅與上漲家數；未能可靠分類者歸入其他／未分類。漲幅為盤後資料，非即時行情。</div></section>
 
