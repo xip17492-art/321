@@ -27,7 +27,7 @@ jobs:
         with:
           node-version: "20"
       - name: Compile Python
-        run: python -m py_compile scripts/update_data.py scripts/analyst_tracker.py
+        run: python -m py_compile scripts/update_data.py scripts/analyst_tracker.py scripts/backtest.py
       - name: Validate radar data structure
         run: |
           python - <<'PY'
@@ -36,11 +36,23 @@ jobs:
           d = json.loads(Path("data/data.json").read_text(encoding="utf-8"))
           stocks = d.get("stocks", []) if isinstance(d, dict) else d
           assert isinstance(stocks, list) and stocks, "No stock records found"
-          required = {"code", "name", "score"}
+          required = {"code", "name", "score", "signal_tier"}
           missing = required - set(stocks[0])
           assert not missing, f"Missing required stock fields: {sorted(missing)}"
+          assert all(x.get("signal_tier") in {"A_強突破","B_突破確認","C_起漲前","D_觀察"} for x in stocks), "invalid signal_tier"
           print(f"Data structure OK: {len(stocks)} stock records")
           PY
+      - name: Validate backtest engine
+        run: |
+          python scripts/backtest.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          b=json.loads(Path("data/backtest.json").read_text(encoding="utf-8"))
+          assert b.get("events",0)>0, "No backtest events"
+          print("Backtest OK:",b["events"])
+          PY
+
       - name: Validate inline JavaScript syntax
         run: |
           python - <<'PY'
