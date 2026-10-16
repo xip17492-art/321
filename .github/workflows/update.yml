@@ -8,7 +8,8 @@ on:
       - 'scripts/**'
       - '.github/workflows/**'
   schedule:
-    - cron: "10 10 * * 1-5"
+    - cron: "15 18 * * 1-5"
+      timezone: "Asia/Taipei"
 
 permissions:
   contents: write
@@ -44,6 +45,20 @@ jobs:
       - name: Update Taiwan stock radar v3.2-F
         run: python scripts/update_data.py
 
+      - name: Walk-forward accuracy backtest
+        run: python scripts/backtest.py
+
+      - name: Validate backtest output
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          b=json.loads(Path("data/backtest.json").read_text(encoding="utf-8"))
+          assert b.get("version") and isinstance(b.get("tiers"),dict), "backtest output invalid"
+          assert b.get("events",0) > 0, "backtest produced no historical events"
+          print("BACKTEST OK:",b.get("events"),"events;",b.get("stocks_tested"),"stocks")
+          PY
+
       - name: Generate offline bootstrap data
         run: |
           python - <<'PY'
@@ -57,7 +72,7 @@ jobs:
 
       - name: Validate generated radar data
         run: |
-          python -m py_compile scripts/update_data.py
+          python -m py_compile scripts/update_data.py scripts/backtest.py
           python - <<'PY'
           import json
           from pathlib import Path
@@ -127,7 +142,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/data.json data/recommendation_history.json data/analyst_tracker.json
+          git add data/data.json data/recommendation_history.json data/analyst_tracker.json data/backtest.json
           git diff --cached --quiet || git commit -m "chore: update Taiwan stock radar v3.2-F data"
           git pull --rebase origin main
           git push
