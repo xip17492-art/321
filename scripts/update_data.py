@@ -536,6 +536,16 @@ def main():
         if ma20 and ma20 > 0: overheat += max(0, (x["close"] / ma20 - 1) * 100) * 0.9
         overheat = clamp(overheat)
 
+        # 3.5 signal tier: distinguish true breakout candidates from overheated/weak moves.
+        if breakout and vr is not None and vr >= 1.5 and mom20 is not None and mom20 > 0 and rr is not None and 50 <= rr <= 75 and overheat < 75:
+            signal_tier = "A_強突破"
+        elif breakout and vr is not None and vr >= 1.25 and mom20 is not None and mom20 > 0 and above_month_line and overheat < 80:
+            signal_tier = "B_突破確認"
+        elif above_month_line and mom20 is not None and mom20 > 0 and vr is not None and vr >= 1.10 and (rr is None or rr < 78) and overheat < 80:
+            signal_tier = "C_起漲前"
+        else:
+            signal_tier = "D_觀察"
+
         row = {
             **x, "score": clamp(score), "overheat_score": overheat, "ma5": ma5, "ma20": ma20, "rsi": rr,
             "volume_ratio": vr, "breakout": breakout,
@@ -544,6 +554,7 @@ def main():
             "above_month_line": above_month_line,
             "technical_setup": "下降趨勢線突破＋站上月線" if trendline_breakout else ("站上月線" if above_month_line else "月線下方"),
             "risk": "high" if overheat >= 75 else ("low" if score >= 75 and overheat < 50 else "medium"),
+            "signal_tier": signal_tier,
             "strategy": "突破回測" if breakout and overheat < 70 else ("避免追高" if overheat >= 75 else ("量增觀察" if score >= 70 else "觀察")),
             "history_close": closes[-252:], "history_volume": vols[-252:],
             "history_date": history_dates[-252:], "history_turnover": turnover_history[-252:],
@@ -735,7 +746,7 @@ def main():
             "relative_strength_20d":x.get("relative_strength_20d"),
             "avg_turnover_20d":x.get("avg_turnover_20d"),
             "liquidity_ok":x.get("liquidity_ok"),"research_factor_score":x.get("research_factor_score"),
-            "market_regime":x.get("market_regime"),"reason":x.get("strategy"),"status":"open"
+            "market_regime":x.get("market_regime"),"signal_tier":x.get("signal_tier"),"reason":x.get("strategy"),"status":"open"
         })
     # One record per calendar date: rerunning the workflow replaces today's snapshot,
     # rather than inflating the recommendation sample size and win-rate statistics.
@@ -774,7 +785,7 @@ def main():
             "ai": "AI欄位目前是手工設計多因子公式轉換的偏多分數（0-100），不是經歷史回測校準的真實上漲機率；不保證獲利。",
             "realtime": "GitHub Pages 的日資料為盤後資料；盤中即時報價需由瀏覽器直接連接 TWSE MIS 或正式即時行情服務。",
             "recommendation_engine": "每日只保留一份推薦快照；重跑同日會更新當日紀錄而不增加樣本數。Top 10 以 T+3 期間內是否達 +2% 追蹤；因子驗證只使用已結算樣本。",
-            "factor_engine": "3.3 新增產業鏈漲幅、下降趨勢線突破＋站上月線判定，並修正每日漲跌幅換算；保留 5/20/60 日動能、52週高點距離（資料不足時以近120日代理）、20日年化波動度、20日平均成交金額流動性過濾、全市場截面中位數相對強弱。流動性過濾影響推薦池，不刪除總表。"
+            "factor_engine": "3.5 新增 A/B/C/D 訊號分級；保留產業鏈漲幅、下降趨勢線突破＋站上月線判定，並修正每日漲跌幅換算；保留 5/20/60 日動能、52週高點距離（資料不足時以近120日代理）、20日年化波動度、20日平均成交金額流動性過濾、全市場截面中位數相對強弱。流動性過濾影響推薦池，不刪除總表。"
         },
         "stocks": result
     }
