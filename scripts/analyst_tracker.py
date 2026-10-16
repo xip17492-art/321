@@ -80,6 +80,13 @@ def main():
         pd=pub_date(a.get("published",""))
         a["article_date"]=pd.isoformat() if pd else None
     db["recommendations"]=(db.get("recommendations",[])+candidates)[-2000:]
+    # Re-parse historical records so old false matches are removed and results never duplicate.
+    for a in db["recommendations"]:
+        a["analyst"]=parse_analyst(a.get("title",""))
+        a["codes"]=[code for code in re.findall(r"(?<!\d)[1-9]\d{3}(?!\d)",a.get("title","")) if code in stockmap]
+        pd=pub_date(a.get("published",""))
+        a["article_date"]=pd.isoformat() if pd else a.get("article_date")
+        a["results"]=[]
 
     stats={}
     for a in db["recommendations"]:
