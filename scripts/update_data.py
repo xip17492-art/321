@@ -170,8 +170,9 @@ def twse_t86():
 def twse_margin():
     d = datetime.now().strftime("%Y%m%d")
     try:
-        j = get_json(f"https://www.twse.com.tw/exchangeReport/MI_MARGN?date={d}&response=json")
-        fields, rows = j.get("fields", []), j.get("data", [])
+        j = get_json(f"https://www.twse.com.tw/rwd/zh/marginTrading/MI_MARGN?date={d}&selectType=ALL&response=json")
+        table = next((t for t in j.get("tables", []) if t.get("fields") and t.get("data")), {})
+        fields, rows = table.get("fields", []), table.get("data", [])
         code_i = pick_index(fields, "證券代號")
         mb_i = pick_index(fields, "融資餘額")
         ms_i = pick_index(fields, "融券餘額")
