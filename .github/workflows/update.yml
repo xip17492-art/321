@@ -45,6 +45,23 @@ jobs:
       - name: Update Taiwan stock radar v3.2-F
         run: python scripts/update_data.py
 
+      - name: Build TAIEX 30-year bottom signal
+        run: python scripts/market_bottom.py
+
+      - name: Validate TAIEX bottom signal
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("data/market_bottom.json").read_text(encoding="utf-8"))
+          assert d.get("version")=="3.6"
+          assert d.get("latest",{}).get("date") and d.get("data_coverage",{}).get("days",0)>=250
+          assert d.get("fear_greed",{}).get("fear_index") is not None
+          assert d.get("bottom_signal",{}).get("score") is not None
+          print("BOTTOM SIGNAL OK:",d["bottom_signal"]["tier"],"score",d["bottom_signal"]["score"])
+          print("TAIEX COVERAGE:",d["data_coverage"])
+          PY
+
       - name: Walk-forward accuracy backtest
         run: python scripts/backtest.py
 
@@ -72,7 +89,7 @@ jobs:
 
       - name: Validate generated radar data
         run: |
-          python -m py_compile scripts/update_data.py scripts/backtest.py
+          python -m py_compile scripts/update_data.py scripts/backtest.py scripts/market_bottom.py
           python - <<'PY'
           import json
           from pathlib import Path
@@ -142,7 +159,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/data.json data/recommendation_history.json data/analyst_tracker.json data/backtest.json
+          git add data/data.json data/recommendation_history.json data/analyst_tracker.json data/backtest.json data/market_bottom.json
           git diff --cached --quiet || git commit -m "chore: update Taiwan stock radar v3.2-F data"
           git pull --rebase origin main
           git push
