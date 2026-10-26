@@ -1,75 +1,75 @@
 {
   "version": "1.0",
-  "generated_at": "2026-10-23T18:52+08:00",
+  "generated_at": "2026-10-26T18:59+08:00",
   "method": "歷史收盤＋成交量 walk-forward；每個訊號只使用當日及以前資料，T+3 不使用未來資料判斷訊號。",
-  "events": 32462,
+  "events": 32362,
   "stocks_tested": 1086,
   "baseline": {
-    "samples": 238165,
-    "hit_2pct_t3_rate": 32.6,
-    "close_2pct_t3_rate": 24.2
+    "samples": 237015,
+    "hit_2pct_t3_rate": 32.7,
+    "close_2pct_t3_rate": 24.3
   },
   "tiers": {
     "A_強突破": {
-      "samples": 11860,
-      "hit": 4958,
-      "close_win": 3641,
-      "stop": 4246,
-      "avg_max_return": 2.83,
-      "avg_close_return": 0.63,
-      "hit_rate": 41.8,
+      "samples": 11829,
+      "hit": 4951,
+      "close_win": 3636,
+      "stop": 4231,
+      "avg_max_return": 2.84,
+      "avg_close_return": 0.64,
+      "hit_rate": 41.9,
       "close_win_rate": 30.7,
       "stop_rate": 35.8
     },
     "B_突破確認": {
-      "samples": 7470,
-      "hit": 3042,
-      "close_win": 2210,
-      "stop": 2799,
-      "avg_max_return": 2.71,
+      "samples": 7452,
+      "hit": 3039,
+      "close_win": 2208,
+      "stop": 2789,
+      "avg_max_return": 2.72,
       "avg_close_return": 0.28,
-      "hit_rate": 40.7,
+      "hit_rate": 40.8,
       "close_win_rate": 29.6,
-      "stop_rate": 37.5
+      "stop_rate": 37.4
     },
     "C_起漲前": {
-      "samples": 13132,
-      "hit": 3984,
-      "close_win": 2973,
-      "stop": 2887,
-      "avg_max_return": 1.72,
+      "samples": 13081,
+      "hit": 3975,
+      "close_win": 2966,
+      "stop": 2870,
+      "avg_max_return": 1.73,
       "avg_close_return": 0.21,
-      "hit_rate": 30.3,
-      "close_win_rate": 22.6,
-      "stop_rate": 22.0
+      "hit_rate": 30.4,
+      "close_win_rate": 22.7,
+      "stop_rate": 21.9
     }
   },
   "score_buckets": {
     "90-99": {
-      "samples": 10488,
-      "hit": 4333,
-      "close_win": 3194,
-      "hit_rate": 41.3,
+      "samples": 10460,
+      "hit": 4329,
+      "close_win": 3191,
+      "hit_rate": 41.4,
       "close_win_rate": 30.5
     },
     "80-89": {
-      "samples": 10195,
-      "hit": 3759,
-      "close_win": 2760,
+      "samples": 10167,
+      "hit": 3753,
+      "close_win": 2756,
       "hit_rate": 36.9,
       "close_win_rate": 27.1
     },
     "70-79": {
-      "samples": 6511,
-      "hit": 2126,
-      "close_win": 1568,
+      "samples": 6483,
+      "hit": 2120,
+      "close_win": 1563,
       "hit_rate": 32.7,
       "close_win_rate": 24.1
     },
     "60-69": {
-      "samples": 5234,
-      "hit": 1747,
-      "close_win": 1287,
+      "samples": 5218,
+      "hit": 1744,
+      "close_win": 1285,
       "hit_rate": 33.4,
       "close_win_rate": 24.6
     },
@@ -93,6 +93,23 @@
     "definition": "T+3 期間內任一收盤價相對訊號價達 +2% 為命中；此回測不等同未來保證。"
   },
   "recent_events": [
+    {
+      "code": "6965",
+      "name": "中傑-KY",
+      "date": "2026-04-21",
+      "tier": "C_起漲前",
+      "breakout": false,
+      "volume_ratio": 1.21,
+      "momentum20": 6.74,
+      "rsi": 65.7,
+      "heat": 1.0,
+      "hit_2pct_t3": false,
+      "close_2pct_t3": false,
+      "stop_3pct_t3": true,
+      "max_return_t3": -1.35,
+      "close_return_t3": -3.49,
+      "min_return_t3": -3.49
+    },
     {
       "code": "6965",
       "name": "中傑-KY",
@@ -1588,23 +1605,6 @@
       "max_return_t3": -0.97,
       "close_return_t3": -1.93,
       "min_return_t3": -1.93
-    },
-    {
-      "code": "2923",
-      "name": "鼎固-KY",
-      "date": "2025-11-17",
-      "tier": "C_起漲前",
-      "breakout": false,
-      "volume_ratio": 2.533,
-      "momentum20": 0.5,
-      "rsi": 46.5,
-      "heat": 14.5,
-      "hit_2pct_t3": false,
-      "close_2pct_t3": false,
-      "stop_3pct_t3": true,
-      "max_return_t3": -0.75,
-      "close_return_t3": -0.75,
-      "min_return_t3": -3.98
     },
     {
       "code": "2923",
