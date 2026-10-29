@@ -1,19 +1,19 @@
 {
   "version": "3.6",
-  "generated_at": "2026-10-28T11:06+00:00",
+  "generated_at": "2026-10-29T11:06+00:00",
   "source": "TAIEX daily history via Yahoo Finance chart API; margin via TWSE MI_MARGN official report",
   "latest": {
-    "date": "2026-10-28",
-    "close": 47035.578125,
-    "drawdown_pct": -5.59,
-    "rsi14": 30.7,
-    "return_5d_pct": 0.46,
-    "return_20d_pct": -2.33,
-    "recovery_needed_pct": 5.9
+    "date": "2026-10-29",
+    "close": 46368.328125,
+    "drawdown_pct": -6.93,
+    "rsi14": 26.9,
+    "return_5d_pct": 0.16,
+    "return_20d_pct": -3.45,
+    "recovery_needed_pct": 7.4
   },
   "fear_greed": {
-    "fear_index": 15.7,
-    "greed_index": 84.3,
+    "fear_index": 20.0,
+    "greed_index": 80.0,
     "label": "貪婪"
   },
   "margin": {
@@ -23,7 +23,7 @@
     "series": []
   },
   "bottom_signal": {
-    "score": 17.9,
+    "score": 22.5,
     "tier": "⚪ 非抄底區",
     "rule": "歷史回撤＋RSI＋5日跌幅＋融資餘額高點回落綜合；融資餘額快速下降只視為去槓桿/強制賣壓代理，不等於真正爆倉金額。"
   },
@@ -108,9 +108,9 @@
     }
   ],
   "data_coverage": {
-    "days": 7184,
+    "days": 7185,
     "start": "1997-07-02",
-    "end": "2026-10-28",
+    "end": "2026-10-29",
     "window_years": 28.5
   }
 }
