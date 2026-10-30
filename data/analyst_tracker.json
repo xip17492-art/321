@@ -3134,6 +3134,37 @@
       "codes": [],
       "article_date": "2026-10-05",
       "results": []
+    },
+    {
+      "title": "晶片股高點還在後頭？分析師看好漲勢延續至2027年 - 鉅亨網",
+      "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTFA1Y2pQcU1tdkMzMmpLZlp0SGkzQkl4WkMxUXdsT1hpektCaGhLLXl2MUZhZE1SM0RjVk9KQ3FJbXZ2Qjd4ZmJheWgySXRxN3M?oc=5",
+      "published": "Wed, 21 Oct 2026 07:00:00 GMT",
+      "analyst": null,
+      "codes": [
+        "2027"
+      ],
+      "article_date": "2026-10-21",
+      "results": []
+    },
+    {
+      "title": "台股暴漲1783點是逃命波？分析師看好「這幾檔」：比台積電更有戲 - 三立新聞網SETN.com",
+      "url": "https://news.google.com/rss/articles/CBMiS0FVX3lxTFBPd09JS21RTURtdTFLdmFLU1hWdGNiMFlWNUFjWmNYRmJHTGtxS2lZWWU0WW9HQThTOUI0LU5pN2Fnb3ZRS0pPRjF2NA?oc=5",
+      "published": "Tue, 21 Jul 2026 07:00:00 GMT",
+      "analyst": null,
+      "codes": [
+        "1783"
+      ],
+      "article_date": "2026-07-21",
+      "results": []
+    },
+    {
+      "title": "台股開盤一度衝破4萬6400點 分析師看好長期國際資金投入 - 公視新聞",
+      "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTFBHVHdydkt1M3BUS1V4UVRXZmV1WVREamhBSjFQRmt4dVZydXpDeEZ0Z1A2dGpoYXhubEVzREhjVUs3MXhsQzdPcU1hMzdZNEU?oc=5",
+      "published": "Fri, 14 Aug 2026 07:00:00 GMT",
+      "analyst": null,
+      "codes": [],
+      "article_date": "2026-08-14",
+      "results": []
     }
   ],
   "analysts": {
@@ -3408,6 +3439,6 @@
       "confidence": "樣本不足"
     }
   },
-  "last_scan": "2026-10-29T11:04+00:00",
+  "last_scan": "2026-10-30T11:02+00:00",
   "method": "僅接受明確可辨識的分析師姓名＋存在於當期股票資料的4位代號；以文章日期後第3個交易日收盤相對報酬計算，未完成T+3不計入勝率。"
 }
