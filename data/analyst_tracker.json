@@ -3466,6 +3466,26 @@
       "codes": [],
       "article_date": "2026-11-06",
       "results": []
+    },
+    {
+      "title": "台股年後誰先噴？杜金龍點名「台泥、友達谷底翻」複製台塑四寶飆漲！昇達科、光聖、華通回檔●％就是買點 - 今周刊",
+      "url": "https://news.google.com/rss/articles/CBMigAFBVV95cUxPekpvbDlvNVo5WmUzLUh4MTZwNHNmdEZPQjlRckJQeDlXSFZJTU1hY09jUWZ6Q19aVGNrRmRUR0h6QzEteGFOM0kzU1pNRnkweFQ2UEcxSlhRdVV6c0VqYk1DS21McURqZkl5LXlDWnU0bTZ5XzdBMXRFRkRGbVhzQQ?oc=5",
+      "published": "Fri, 13 Feb 2026 08:00:00 GMT",
+      "analyst": null,
+      "codes": [],
+      "article_date": "2026-02-13",
+      "results": []
+    },
+    {
+      "title": "晶片股高點還在後頭？分析師看好漲勢延續至2027年 - Yahoo股市",
+      "url": "https://news.google.com/rss/articles/CBMi0gJBVV95cUxNTnF0cXdPLTZta01mU2E3azUwN2UzT2ctb29fOVQtMVoxemhUamdvblZjNWFudTc5bmFvU3JXU0szcDJ2LVlFNC0tVnVYZDhsQzJDV0pKdjg2ZTNmZEF1SGJCZkg2RHNVTVJGZGtCU1JOdklOT0twMkRFNkVBZjIxRkRPRFRnRUJ2MnFSVWN1aXZxSXRwMGZSb1RzVFF2SXl5T3BwQ1hKQnVobWZETmVOMzB2VkpYYTgyU1dfLWNpbG56ejlVUzctOFZkT2dCQXBpWXVSWDlIQWZ3MjlqNVJzRTNYNFVMbk04WmFqUm5SWVJjc2loakNiUjJjOE5ybERnbDdxTm4wZnFZWVRBdUE0aXlldjFhWEtMc21na2dFZGJ5eTZKbVowa24xNUI5dTJ1dUo5Wnl5Ri1FZlVBXzlnd3FYZnhjaW5GZDlacm5FdEdHQQ?oc=5",
+      "published": "Tue, 20 Oct 2026 07:00:00 GMT",
+      "analyst": null,
+      "codes": [
+        "2027"
+      ],
+      "article_date": "2026-10-20",
+      "results": []
     }
   ],
   "analysts": {
@@ -3785,6 +3805,6 @@
       "confidence": "樣本不足"
     }
   },
-  "last_scan": "2026-11-11T18:01+00:00",
+  "last_scan": "2026-11-12T18:26+00:00",
   "method": "僅接受明確可辨識的分析師姓名＋存在於當期股票資料的4位代號；以文章日期後第3個交易日收盤相對報酬計算，未完成T+3不計入勝率。"
 }
