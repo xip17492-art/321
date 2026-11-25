@@ -1,0 +1,12 @@
+{
+  "name": "Global Radar｜全球金融分析平台",
+  "short_name": "Global Radar",
+  "description": "私人全球金融市場研究與模擬交易工作區",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#08111d",
+  "theme_color": "#08111d",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
